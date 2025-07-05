@@ -1,0 +1,15 @@
+# Build files
+build/
+*.o
+cshell
+
+# IDE files
+.vscode/
+.idea/
+.DS_Store
+*.swp
+*.swo
+
+# Debug files
+*.dSYM/
+core
