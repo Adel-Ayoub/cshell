@@ -1,10 +1,11 @@
 # Build files
 build/
+obj/
 *.o
+*.a
 cshell
 
 # IDE files
-.vscode/
 .idea/
 .DS_Store
 *.swp
@@ -12,4 +13,14 @@ cshell
 
 # Debug files
 *.dSYM/
-core
+
+# Library files
+libdl/libdl.a
+
+# Temporary files
+*.tmp
+*.temp
+
+# Log files
+*.log
+
