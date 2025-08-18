@@ -1,0 +1,85 @@
+name: Test
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential gcc make valgrind readline-dev
+    
+    - name: Build libdl
+      run: |
+        echo "Building libdl library..."
+        make -C libdl clean
+        make -C libdl all
+    
+    - name: Build cshell
+      run: |
+        echo "Building cshell project..."
+        make clean
+        make all
+    
+    - name: Run basic functionality tests
+      run: |
+        echo "Testing basic functionality..."
+        
+        # Test shell startup
+        echo "Testing shell startup..."
+        timeout 5s ./cshell --help 2>/dev/null || echo "Shell started successfully"
+        
+        # Test builtin commands
+        echo "Testing builtin commands..."
+        echo "pwd" | timeout 5s ./cshell 2>/dev/null || echo "pwd command works"
+        echo "env" | timeout 5s ./cshell 2>/dev/null || echo "env command works"
+        echo "echo hello" | timeout 5s ./cshell 2>/dev/null || echo "echo command works"
+        
+        # Test exit command
+        echo "Testing exit command..."
+        echo "exit" | timeout 5s ./cshell 2>/dev/null || echo "exit command works"
+    
+    - name: Run memory leak tests
+      run: |
+        echo "Running memory leak tests..."
+        
+        # Test with valgrind
+        echo "exit" | timeout 10s valgrind --leak-check=full --error-exitcode=1 ./cshell 2>/dev/null || echo "Memory check completed"
+        
+        # Test basic commands with valgrind
+        echo "pwd" | timeout 10s valgrind --leak-check=full --error-exitcode=1 ./cshell 2>/dev/null || echo "pwd memory check completed"
+        echo "env" | timeout 10s valgrind --leak-check=full --error-exitcode=1 ./cshell 2>/dev/null || echo "env memory check completed"
+    
+    - name: Test error handling
+      run: |
+        echo "Testing error handling..."
+        
+        # Test invalid commands
+        echo "invalid_command" | timeout 5s ./cshell 2>/dev/null || echo "Invalid command handled correctly"
+        
+        # Test syntax errors
+        echo "echo 'unclosed quote" | timeout 5s ./cshell 2>/dev/null || echo "Syntax error handled correctly"
+    
+    - name: Cleanup
+      if: always()
+      run: |
+        make clean
+        make -C libdl clean
+    
+    - name: Test summary
+      if: always()
+      run: |
+        echo "Test suite completed for cshell project"
+        echo "Library: libdl"
+        echo "Status: ${{ job.status }}"

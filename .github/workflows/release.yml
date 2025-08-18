@@ -1,0 +1,113 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential gcc make readline-dev
+    
+    - name: Build libdl
+      run: |
+        echo "Building libdl library..."
+        make -C libdl clean
+        make -C libdl all
+    
+    - name: Build cshell
+      run: |
+        echo "Building cshell project..."
+        make clean
+        make all
+    
+    - name: Create release archive
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/}
+        echo "Creating release for version: $VERSION"
+        
+        # Create release directory
+        mkdir -p release/cshell-$VERSION
+        
+        # Copy source files
+        cp -r src/ release/cshell-$VERSION/
+        cp -r libdl/ release/cshell-$VERSION/
+        cp Makefile release/cshell-$VERSION/
+        cp README.md release/cshell-$VERSION/
+        cp LICENSE release/cshell-$VERSION/
+        
+        # Copy binary
+        cp cshell release/cshell-$VERSION/
+        
+        # Create archive
+        tar -czf cshell-$VERSION.tar.gz -C release cshell-$VERSION
+        
+        # List contents
+        ls -la cshell-$VERSION.tar.gz
+        tar -tzf cshell-$VERSION.tar.gz
+    
+    - name: Create GitHub Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: cshell ${{ github.ref }}
+        body: |
+          ## cshell ${{ github.ref }}
+          
+          ### What's New
+          - Updated to use libdl library
+          - Improved build system
+          - Enhanced CI/CD pipeline
+          
+          ### Installation
+          ```bash
+          # Extract and build
+          tar -xzf cshell-${{ github.ref }}.tar.gz
+          cd cshell-${{ github.ref }}
+          make all
+          
+          # Run
+          ./cshell
+          ```
+          
+          ### Changes
+          - Renamed libft to libdl
+          - Updated function names from ft_* to dl_*
+          - Improved GitHub Actions workflows
+          
+          ### Build Requirements
+          - gcc or clang
+          - make
+          - readline library
+          
+        draft: false
+        prerelease: false
+    
+    - name: Upload release assets
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./cshell-${{ github.ref }}.tar.gz
+        asset_name: cshell-${{ github.ref }}.tar.gz
+        asset_content_type: application/gzip
+    
+    - name: Cleanup
+      if: always()
+      run: |
+        make clean
+        make -C libdl clean
+        rm -rf release/
+        rm -f cshell-*.tar.gz

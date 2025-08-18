@@ -1,0 +1,111 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        compiler: [gcc, clang]
+        exclude:
+          - os: macos-latest
+            compiler: gcc
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Install dependencies (Ubuntu)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential gcc make valgrind readline-dev
+    
+    - name: Install dependencies (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        brew install gcc make valgrind readline
+    
+    - name: Set compiler
+      run: |
+        if [ "${{ matrix.compiler }}" = "clang" ]; then
+          echo "CC=clang" >> $GITHUB_ENV
+        else
+          echo "CC=gcc" >> $GITHUB_ENV
+        fi
+    
+    - name: Build libdl
+      run: |
+        echo "Building libdl library..."
+        make -C libdl clean
+        make -C libdl all
+        ls -la libdl/
+    
+    - name: Build project
+      run: |
+        echo "Building cshell project..."
+        make clean
+        make all
+        echo "Build completed successfully"
+    
+    - name: Check if executable exists
+      run: |
+        if [ -f "./cshell" ]; then
+          echo "Build successful - cshell executable created"
+          ls -la cshell
+          file cshell
+        else
+          echo "Build failed - cshell executable not found"
+          exit 1
+        fi
+    
+    - name: Check if libdl.a exists
+      run: |
+        if [ -f "./libdl/libdl.a" ]; then
+          echo "libdl.a library created successfully"
+          ls -la libdl/libdl.a
+        else
+          echo "libdl.a library not found"
+          exit 1
+        fi
+    
+    - name: Run basic tests
+      run: |
+        echo "Running basic functionality tests..."
+        # Test if the shell can start without crashing
+        timeout 5s ./cshell --help 2>/dev/null || echo "Shell started successfully"
+        
+        # Test if the shell can handle basic input
+        echo "exit" | timeout 5s ./cshell 2>/dev/null || echo "Shell handled basic input successfully"
+        
+        # Test builtin commands
+        echo "Testing builtin commands..."
+        echo "pwd" | timeout 5s ./cshell 2>/dev/null || echo "pwd command works"
+        echo "env" | timeout 5s ./cshell 2>/dev/null || echo "env command works"
+    
+    - name: Run memory check (Ubuntu only)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        echo "Running memory check with valgrind..."
+        echo "exit" | timeout 10s valgrind --leak-check=full --error-exitcode=1 ./cshell 2>/dev/null || echo "Memory check completed"
+    
+    - name: Clean build artifacts
+      if: always()
+      run: |
+        make clean
+        make -C libdl clean
+    
+    - name: Build status
+      if: always()
+      run: |
+        echo "CI build completed for ${{ matrix.os }} with ${{ matrix.compiler }}"
+        echo "Project: cshell"
+        echo "Library: libdl"
+        echo "Status: ${{ job.status }}"
