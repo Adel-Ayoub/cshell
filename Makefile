@@ -1,37 +1,126 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c99 -g
-TARGET = cshell
+CFLAGS = -Wall -Wextra -Werror -g
+NAME = cshell
 SRCDIR = src
-CMDDIR = $(SRCDIR)/commands
-BUILDDIR = build
+BUILDDIR = obj
+LIBDLDIR = libdl
 
-# Source files
-MAIN_SRC = $(SRCDIR)/main.c
-CORE_SRC = $(SRCDIR)/shell.c $(SRCDIR)/parser.c $(SRCDIR)/executor.c
-CMD_SRC = $(wildcard $(CMDDIR)/*.c)
-ALL_SRC = $(MAIN_SRC) $(CORE_SRC) $(CMD_SRC)
+# Source files organized by module
+CORE_SRC = $(SRCDIR)/core/main.c \
+           $(SRCDIR)/core/signal_handlers.c \
+           $(SRCDIR)/core/utils.c
+
+BUILTINS_SRC = $(SRCDIR)/builtins/built.c \
+               $(SRCDIR)/builtins/directory.c \
+               $(SRCDIR)/builtins/env_export.c \
+               $(SRCDIR)/builtins/env_unset.c \
+               $(SRCDIR)/builtins/environment.c \
+               $(SRCDIR)/builtins/exit_val_calc.c \
+               $(SRCDIR)/builtins/handle_built.c
+
+COMMANDS_SRC = $(SRCDIR)/commands/finding_execs.c \
+               $(SRCDIR)/commands/handle_commands.c \
+               $(SRCDIR)/commands/kid_signals.c \
+               $(SRCDIR)/commands/pipe_utils.c \
+               $(SRCDIR)/commands/piping.c
+
+INPUT_SRC = $(SRCDIR)/input_handling/error_checks.c \
+            $(SRCDIR)/input_handling/error_parser.c \
+            $(SRCDIR)/input_handling/error_utils.c \
+            $(SRCDIR)/input_handling/expand_envs.c \
+            $(SRCDIR)/input_handling/dl_ls.c \
+            $(SRCDIR)/input_handling/lex_checks.c \
+            $(SRCDIR)/input_handling/parse_split.c \
+            $(SRCDIR)/input_handling/split_utils.c \
+            $(SRCDIR)/input_handling/wild_cards.c \
+            $(SRCDIR)/input_handling/wild_utils.c
+
+REDIRECTION_SRC = $(SRCDIR)/redirection/here_doc.c \
+                  $(SRCDIR)/redirection/open_files.c \
+                  $(SRCDIR)/redirection/redirection.c
+
+LIBDL_SRC = $(LIBDLDIR)/dl_atoi.c \
+            $(LIBDLDIR)/dl_bzero.c \
+            $(LIBDLDIR)/dl_calloc.c \
+            $(LIBDLDIR)/dl_isalnum.c \
+            $(LIBDLDIR)/dl_isalpha.c \
+            $(LIBDLDIR)/dl_isascii.c \
+            $(LIBDLDIR)/dl_isdigit.c \
+            $(LIBDLDIR)/dl_isprint.c \
+            $(LIBDLDIR)/dl_itoa.c \
+            $(LIBDLDIR)/dl_memchr.c \
+            $(LIBDLDIR)/dl_memcmp.c \
+            $(LIBDLDIR)/dl_memcpy.c \
+            $(LIBDLDIR)/dl_memmove.c \
+            $(LIBDLDIR)/dl_memset.c \
+            $(LIBDLDIR)/dl_putchar_fd.c \
+            $(LIBDLDIR)/dl_putendl_fd.c \
+            $(LIBDLDIR)/dl_putnbr_fd.c \
+            $(LIBDLDIR)/dl_putstr_fd.c \
+            $(LIBDLDIR)/dl_split.c \
+            $(LIBDLDIR)/dl_strchr.c \
+            $(LIBDLDIR)/dl_strdup.c \
+            $(LIBDLDIR)/dl_striteri.c \
+            $(LIBDLDIR)/dl_strjoin.c \
+            $(LIBDLDIR)/dl_strlcat.c \
+            $(LIBDLDIR)/dl_strlcpy.c \
+            $(LIBDLDIR)/dl_strlen.c \
+            $(LIBDLDIR)/dl_strmapi.c \
+            $(LIBDLDIR)/dl_strncmp.c \
+            $(LIBDLDIR)/dl_strnstr.c \
+            $(LIBDLDIR)/dl_strrchr.c \
+            $(LIBDLDIR)/dl_strtrim.c \
+            $(LIBDLDIR)/dl_substr.c \
+            $(LIBDLDIR)/dl_tolower.c \
+            $(LIBDLDIR)/dl_toupper.c \
+            $(LIBDLDIR)/dl_lstadd_back_bonus.c \
+            $(LIBDLDIR)/dl_lstadd_front_bonus.c \
+            $(LIBDLDIR)/dl_lstclear_bonus.c \
+            $(LIBDLDIR)/dl_lstdelone_bonus.c \
+            $(LIBDLDIR)/dl_lstiter_bonus.c \
+            $(LIBDLDIR)/dl_lstlast_bonus.c \
+            $(LIBDLDIR)/dl_lstmap_bonus.c \
+            $(LIBDLDIR)/dl_lstnew_bonus.c \
+            $(LIBDLDIR)/dl_lstsize_bonus.c \
+            $(LIBDLDIR)/get_next_line.c \
+            $(LIBDLDIR)/get_next_line_utils.c
+
+# All source files
+ALL_SRC = $(CORE_SRC) $(BUILTINS_SRC) $(COMMANDS_SRC) $(INPUT_SRC) $(REDIRECTION_SRC) $(LIBDL_SRC)
 
 # Object files
-OBJ = $(ALL_SRC:$(SRCDIR)/%.c=$(BUILDDIR)/%.o)
+OBJ = $(ALL_SRC:%.c=$(BUILDDIR)/%.o)
 
-.PHONY: all clean install debug
+# Libraries
+LIBDL = $(LIBDLDIR)/libdl.a
 
-all: $(TARGET)
+# macOS readline paths (Homebrew)
+READLINE_DIR = /opt/homebrew/opt/readline
+READLINE_INC = -I$(READLINE_DIR)/include -I$(SRCDIR)
+READLINE_LIB = -L$(READLINE_DIR)/lib -lreadline
 
-$(TARGET): $(OBJ)
-	$(CC) $(OBJ) -o $@
+.PHONY: all clean fclean re bonus
 
-$(BUILDDIR)/%.o: $(SRCDIR)/%.c
+all: $(NAME)
+
+$(NAME): $(LIBDL) $(OBJ)
+	$(CC) $(OBJ) $(READLINE_LIB) -o $@
+
+$(LIBDL): $(LIBDL_SRC)
+	@make -C $(LIBDLDIR)
+
+$(BUILDDIR)/%.o: %.c
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(READLINE_INC) -c $< -o $@
 
 clean:
-	rm -rf $(BUILDDIR) $(TARGET)
+	@make -C $(LIBDLDIR) clean
+	@rm -rf $(BUILDDIR)
 
-install: $(TARGET)
-	cp $(TARGET) /usr/local/bin/cshell
+fclean: clean
+	@make -C $(LIBDLDIR) fclean
+	@rm -f $(NAME)
 
-debug: CFLAGS += -DDEBUG
-debug: $(TARGET)
+re: fclean all
 
-rebuild: clean all
+bonus: all
