@@ -16,11 +16,6 @@ int execute_commands(void)
     }
 }
 
-int execute_builtin(char **args)
-{
-    return (work_built(args));
-}
-
 int execute_external(char **args)
 {
     pid_t pid;
