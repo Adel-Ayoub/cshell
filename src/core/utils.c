@@ -6,12 +6,15 @@ int setup_shell(char **env)
     if (copy_environment(env) != 0)
         return (-1);
     
-    // Setup terminal
-    if (tcgetattr(STDIN_FILENO, &g_data.original_termios) != 0)
-        return (-1);
-    
     // Check if running interactively
     g_data.interactive_mode = isatty(STDIN_FILENO);
+    
+    // Setup terminal only if interactive
+    if (g_data.interactive_mode)
+    {
+        if (tcgetattr(STDIN_FILENO, &g_data.original_termios) != 0)
+            return (-1);
+    }
     
     // Setup signals
     setup_signals();
