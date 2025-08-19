@@ -224,6 +224,27 @@ void free_wildcards(t_wild *list)
     // TODO: Implement wildcard cleanup
 }
 
+void free_wild_help(t_whelp *list)
+{
+    t_whelp *current;
+    t_whelp *next;
+
+    if (!list)
+        return;
+    
+    current = list;
+    while (current)
+    {
+        next = current->next;
+        if (current->pattern)
+            free(current->pattern);
+        if (current->matches)
+            free_string_array(current->matches);
+        free(current);
+        current = next;
+    }
+}
+
 void free_command_tree(t_cond *tree)
 {
     (void)tree;
