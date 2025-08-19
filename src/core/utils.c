@@ -236,10 +236,8 @@ void free_wild_help(t_whelp *list)
     while (current)
     {
         next = current->next;
-        if (current->pattern)
-            free(current->pattern);
-        if (current->matches)
-            free_string_array(current->matches);
+        if (current->str)
+            free(current->str);
         free(current);
         current = next;
     }
