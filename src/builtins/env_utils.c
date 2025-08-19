@@ -4,8 +4,6 @@ int builtin_echo(char **args)
 {
     int i;
     int newline;
-    int in_quotes;
-    char quote_char;
 
     if (!args[1])
     {
@@ -25,29 +23,7 @@ int builtin_echo(char **args)
     // Print arguments
     while (args[i])
     {
-        in_quotes = 0;
-        quote_char = 0;
-        
-        // Handle quotes
-        if (args[i][0] == '"' || args[i][0] == '\'')
-        {
-            quote_char = args[i][0];
-            in_quotes = 1;
-            dl_putstr_fd(args[i] + 1, STDOUT_FILENO);
-        }
-        else if (args[i][dl_strlen(args[i]) - 1] == quote_char)
-        {
-            in_quotes = 0;
-            // Remove closing quote
-            char temp = args[i][dl_strlen(args[i]) - 1];
-            args[i][dl_strlen(args[i]) - 1] = '\0';
-            dl_putstr_fd(args[i], STDOUT_FILENO);
-            args[i][dl_strlen(args[i])] = temp;
-        }
-        else
-        {
-            dl_putstr_fd(args[i], STDOUT_FILENO);
-        }
+        dl_putstr_fd(args[i], STDOUT_FILENO);
         
         // Add space between arguments (except for the last one)
         if (args[i + 1])
