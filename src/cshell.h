@@ -163,6 +163,8 @@ void setup_signals(void);
 void handle_sigint(int sig);
 void handle_sigquit(int sig);
 void handle_child_signals(void);
+void block_signals(void);
+void unblock_signals(void);
 
 // Input handling
 char *read_input(void);
