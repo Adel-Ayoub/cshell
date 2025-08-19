@@ -14,9 +14,6 @@ cshell
 # Debug files
 *.dSYM/
 
-# Library files
-libdl/libdl.a
-
 # Temporary files
 *.tmp
 *.temp

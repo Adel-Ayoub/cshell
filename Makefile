@@ -47,7 +47,7 @@ ALL_SRC = $(CORE_SRC) $(BUILTINS_SRC) $(COMMANDS_SRC) $(INPUT_SRC) $(REDIRECTION
 OBJ = $(ALL_SRC:%.c=$(BUILDDIR)/%.o)
 
 # Libraries
-LIBDL = $(LIBDLDIR)/libdl.a
+LIBDL = build/libdl.a
 
 # libdl source files (for building the library)
 LIBDL_SRC = $(LIBDLDIR)/dl_atoi.c \
@@ -109,7 +109,9 @@ $(NAME): $(LIBDL) $(OBJ)
 	$(CC) $(OBJ) $(LIBDL) $(READLINE_LIB) -o $@
 
 $(LIBDL): $(LIBDL_SRC)
+	@mkdir -p build
 	@make -C $(LIBDLDIR)
+	@mv $(LIBDLDIR)/libdl.a build/
 
 $(BUILDDIR)/%.o: %.c
 	@mkdir -p $(dir $@)
