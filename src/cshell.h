@@ -156,6 +156,7 @@ int main(int argc, char **argv, char **env);
 void shell_loop(void);
 int setup_shell(char **env);
 void cleanup_shell(void);
+char *get_prompt(void);
 
 // Signal handlers
 void setup_signals(void);

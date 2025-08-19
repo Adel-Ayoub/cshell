@@ -48,8 +48,10 @@ void shell_loop(void)
         // Display prompt
         if (g_data.interactive_mode)
         {
-            char *prompt = "cshell$ ";
+            char *prompt = get_prompt();
             input = readline(prompt);
+            if (prompt != NULL && prompt[0] != '\0')
+                free(prompt);
         }
         else
         {
@@ -106,6 +108,40 @@ char *read_input(void)
         line[line_size - 1] = '\0';
     
     return (line);
+}
+
+char *get_prompt(void)
+{
+    char *cwd;
+    char *prompt;
+    char *username;
+    char *hostname;
+    
+    // Get current working directory
+    cwd = getcwd(NULL, 0);
+    if (!cwd)
+        cwd = dl_strdup("unknown");
+    
+    // Get username from environment
+    username = get_environment_variable("USER");
+    if (!username)
+        username = dl_strdup("user");
+    
+    // Get hostname from environment  
+    hostname = get_environment_variable("HOSTNAME");
+    if (!hostname)
+        hostname = dl_strdup("localhost");
+    
+    // Create colored prompt: user@host:cwd$ 
+    prompt = dl_strjoin(dl_strjoin(dl_strjoin(dl_strjoin(username, "@"), hostname), ":"), 
+                       dl_strjoin(cwd, "$ "));
+    
+    // Cleanup
+    free(cwd);
+    free(username);
+    free(hostname);
+    
+    return (prompt ? prompt : dl_strdup("cshell$ "));
 }
 
 void cleanup_all(void)
