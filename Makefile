@@ -39,6 +39,16 @@ REDIRECTION_SRC = $(SRCDIR)/redirection/here_doc.c \
                   $(SRCDIR)/redirection/open_files.c \
                   $(SRCDIR)/redirection/redirection.c
 
+# All source files (excluding libdl, which is built as a library)
+ALL_SRC = $(CORE_SRC) $(BUILTINS_SRC) $(COMMANDS_SRC) $(INPUT_SRC) $(REDIRECTION_SRC)
+
+# Object files
+OBJ = $(ALL_SRC:%.c=$(BUILDDIR)/%.o)
+
+# Libraries
+LIBDL = $(LIBDLDIR)/libdl.a
+
+# libdl source files (for building the library)
 LIBDL_SRC = $(LIBDLDIR)/dl_atoi.c \
             $(LIBDLDIR)/dl_bzero.c \
             $(LIBDLDIR)/dl_calloc.c \
@@ -85,15 +95,6 @@ LIBDL_SRC = $(LIBDLDIR)/dl_atoi.c \
             $(LIBDLDIR)/get_next_line.c \
             $(LIBDLDIR)/get_next_line_utils.c
 
-# All source files
-ALL_SRC = $(CORE_SRC) $(BUILTINS_SRC) $(COMMANDS_SRC) $(INPUT_SRC) $(REDIRECTION_SRC) $(LIBDL_SRC)
-
-# Object files
-OBJ = $(ALL_SRC:%.c=$(BUILDDIR)/%.o)
-
-# Libraries
-LIBDL = $(LIBDLDIR)/libdl.a
-
 # macOS readline paths (Homebrew)
 READLINE_DIR = /opt/homebrew/opt/readline
 READLINE_INC = -I$(READLINE_DIR)/include -I$(SRCDIR)
@@ -104,7 +105,7 @@ READLINE_LIB = -L$(READLINE_DIR)/lib -lreadline
 all: $(NAME)
 
 $(NAME): $(LIBDL) $(OBJ)
-	$(CC) $(OBJ) $(READLINE_LIB) -o $@
+	$(CC) $(OBJ) $(LIBDL) $(READLINE_LIB) -o $@
 
 $(LIBDL): $(LIBDL_SRC)
 	@make -C $(LIBDLDIR)
