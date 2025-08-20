@@ -121,6 +121,20 @@ typedef struct s_cond {
     int operator; // 0 = none, 1 = &&, 2 = ||
 } t_cond;
 
+// Trinary tree node for command chaining
+typedef struct s_trinary
+{
+    int             type;           // 0=command, 1=AND, 2=OR
+    int             ret;            // Return value
+    int             hd_n;          // Here-doc number
+    char            *content;       // Command string
+    struct s_trinary   *up;           // Parent node
+    struct s_trinary   *first_cond;   // First child (for AND/OR)
+    struct s_trinary   *sec_cond;     // Second child (for AND/OR)
+    struct s_trinary   *back;         // Previous node
+    struct s_trinary   *next;         // Next node (for semicolons)
+} t_trinary;
+
 typedef struct s_data {
     // Terminal and signals
     struct termios original_termios;
@@ -169,6 +183,9 @@ typedef struct s_data {
     // Job control
     t_job *background_jobs;
     int job_count;
+    
+    // Trinary tree for command chaining
+    t_trinary *trinary_tree;
 } t_data;
 
 // Global data structure
@@ -217,6 +234,15 @@ int parse_redirections(void);
 int parse_logical_operators(void);
 int process_single_command(char *command);
 char *trim_whitespace(char *str);
+
+// Trinary tree functions
+t_trinary *create_level(char *str, t_trinary *back, t_trinary *up, int var);
+t_trinary *create_condition_node(char *str, t_trinary *up);
+t_trinary *create_tokenode(t_error help, char *str, t_trinary *back, t_trinary *up);
+int go_through_list(void);
+void traveler(t_trinary *current);
+void exec_node(t_trinary *current);
+void empty_tree(t_trinary *head);
 
 // Redirections
 int setup_redirections(void);
