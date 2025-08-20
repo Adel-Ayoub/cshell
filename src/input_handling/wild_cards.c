@@ -180,8 +180,39 @@ int match_question_pattern(const char *filename, const char *pattern)
 // Match [set] pattern
 int match_bracket_pattern(const char *filename, const char *pattern)
 {
-    // TODO: Implement bracket pattern matching
-    (void)filename;
-    (void)pattern;
-    return (0);
+    if (!filename || !pattern || pattern[0] != '[')
+        return (0);
+    
+    int negated = 0;
+    int i = 1;
+    
+    // Check for negation
+    if (pattern[i] == '^')
+    {
+        negated = 1;
+        i++;
+    }
+    
+    // Find closing bracket
+    while (pattern[i] && pattern[i] != ']')
+        i++;
+    
+    if (pattern[i] != ']')
+        return (0);  // Invalid pattern
+    
+    // Check if character is in the set
+    int found = 0;
+    for (int j = 1; (negated ? j < i : j < i); j++)
+    {
+        if (negated && pattern[j] == '^')
+            continue;
+        
+        if (filename[0] == pattern[j])
+        {
+            found = 1;
+            break;
+        }
+    }
+    
+    return (negated ? !found : found);
 }
