@@ -196,6 +196,8 @@ int tokenize_input(char *input);
 int count_tokens_with_quotes(char *input);
 int fill_tokens_with_quotes(char *input, char **tokens);
 int expand_environment_variables(void);
+int expand_environment_array(char **array);
+char *expand_argument(char *arg);
 char *expand_environment_string(char *str);
 int expand_wildcards(void);
 int wild_card_check(char *pattern);
@@ -213,6 +215,8 @@ char **convert_args_to_array(t_args *list);
 void free_args_list(t_args *list);
 int parse_redirections(void);
 int parse_logical_operators(void);
+int process_single_command(char *command);
+char *trim_whitespace(char *str);
 
 // Redirections
 int setup_redirections(void);

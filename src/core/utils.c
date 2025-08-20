@@ -241,8 +241,99 @@ void reset_error_state(void)
 
 int parse_logical_operators(void)
 {
-    // TODO: Implement logical operator parsing
+    // Parse command chaining with semicolons
+    // Split input on semicolons and process each command separately
+    
+    if (!g_data.input_line)
+        return (0);
+    
+    // Check if input contains semicolons
+    if (dl_strchr(g_data.input_line, ';') == NULL)
+        return (0);
+    
+    // Split on semicolons
+    char **commands = dl_split(g_data.input_line, ';');
+    if (!commands)
+        return (0);
+    
+    // Process each command
+    for (int i = 0; commands[i]; i++)
+    {
+        // Trim whitespace from command
+        char *trimmed = trim_whitespace(commands[i]);
+        if (trimmed && *trimmed)
+        {
+            // Process this command
+            if (process_single_command(trimmed) != 0)
+            {
+                // Error processing command, but continue with others
+                print_error("parse", "error processing command");
+            }
+        }
+        if (trimmed)
+            free(trimmed);
+    }
+    
+    // Clean up
+    free_string_array(commands);
+    
     return (0);
+}
+
+// Process a single command (without semicolons)
+int process_single_command(char *command)
+{
+    if (!command || !*command)
+        return (0);
+    
+    // Store original command
+    char *original_input = g_data.input_line;
+    
+    // Set new input line
+    g_data.input_line = dl_strdup(command);
+    if (!g_data.input_line)
+        return (-1);
+    
+    // Parse this command
+    int result = parse_input(command);
+    
+    // Restore original input
+    if (original_input)
+        g_data.input_line = original_input;
+    
+    return (result);
+}
+
+// Trim whitespace from beginning and end of string
+char *trim_whitespace(char *str)
+{
+    if (!str)
+        return (NULL);
+    
+    // Skip leading whitespace
+    while (*str && (*str == ' ' || *str == '\t' || *str == '\n' || *str == '\r'))
+        str++;
+    
+    if (!*str)
+        return (dl_strdup(""));
+    
+    // Find end of string
+    char *end = str + dl_strlen(str) - 1;
+    
+    // Skip trailing whitespace
+    while (end > str && (*end == ' ' || *end == '\t' || *end == '\n' || *end == '\r'))
+        end--;
+    
+    // Create trimmed copy
+    int len = end - str + 1;
+    char *trimmed = dl_calloc(len + 1, sizeof(char));
+    if (!trimmed)
+        return (NULL);
+    
+    dl_strncpy(trimmed, str, len);
+    trimmed[len] = '\0';
+    
+    return (trimmed);
 }
 
 int validate_syntax(void)

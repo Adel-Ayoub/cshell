@@ -83,6 +83,7 @@ LIBDL_SRC = $(LIBDLDIR)/dl_atoi.c \
             $(LIBDLDIR)/dl_strlen.c \
             $(LIBDLDIR)/dl_strmapi.c \
             $(LIBDLDIR)/dl_strncmp.c \
+            $(LIBDLDIR)/dl_strncpy.c \
             $(LIBDLDIR)/dl_strnstr.c \
             $(LIBDLDIR)/dl_strrchr.c \
             $(LIBDLDIR)/dl_strtrim.c \
