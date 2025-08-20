@@ -40,57 +40,24 @@ int parse_input(char *input)
 int tokenize_input(char *input)
 {
     char **tokens;
-    char *input_copy;
-    char *token;
     int count;
-    int i;
 
     if (!input)
         return (-1);
     
-    // Count tokens
-    count = 0;
-    input_copy = dl_strdup(input);
-    if (!input_copy)
-        return (-1);
-    
-    token = dl_strtok(input_copy, " \t\n");
-    while (token)
-    {
-        count++;
-        token = dl_strtok(NULL, " \t\n");
-    }
+    // Count tokens with proper quote handling
+    count = count_tokens_with_quotes(input);
     
     // Allocate token array
     tokens = (char **)dl_calloc(count + 1, sizeof(char *));
     if (!tokens)
-    {
-        free(input_copy);
         return (-1);
-    }
     
-    // Fill token array
-    free(input_copy);
-    input_copy = dl_strdup(input);
-    if (!input_copy)
+    // Fill token array with proper quote handling
+    if (fill_tokens_with_quotes(input, tokens) != 0)
     {
-        free(tokens);
+        free_string_array(tokens);
         return (-1);
-    }
-    
-    i = 0;
-    token = dl_strtok(input_copy, " \t\n");
-    while (token && i < count)
-    {
-        tokens[i] = dl_strdup(token);
-        if (!tokens[i])
-        {
-            free_string_array(tokens);
-            free(input_copy);
-            return (-1);
-        }
-        i++;
-        token = dl_strtok(NULL, " \t\n");
     }
     
     // Convert to linked list
@@ -98,7 +65,6 @@ int tokenize_input(char *input)
     if (!g_data.args_list)
     {
         free_string_array(tokens);
-        free(input_copy);
         return (-1);
     }
     
@@ -108,13 +74,135 @@ int tokenize_input(char *input)
     {
         free_args_list(g_data.args_list);
         free_string_array(tokens);
-        free(input_copy);
         return (-1);
     }
     
     g_data.args_count = count;
     
     free_string_array(tokens);
-    free(input_copy);
+    return (0);
+}
+
+int count_tokens_with_quotes(char *input)
+{
+    int count;
+    int i;
+    int in_quotes;
+    char quote_char;
+    
+    if (!input)
+        return (0);
+    
+    count = 0;
+    i = 0;
+    in_quotes = 0;
+    quote_char = 0;
+    
+    while (input[i])
+    {
+        // Skip whitespace
+        while (input[i] && (input[i] == ' ' || input[i] == '\t' || input[i] == '\n'))
+            i++;
+        
+        if (!input[i])
+            break;
+        
+        // Start of token
+        count++;
+        
+        // Process token
+        while (input[i] && (in_quotes || (input[i] != ' ' && input[i] != '\t' && input[i] != '\n')))
+        {
+            if (!in_quotes && (input[i] == '"' || input[i] == '\''))
+            {
+                in_quotes = 1;
+                quote_char = input[i];
+                i++;
+            }
+            else if (in_quotes && input[i] == quote_char)
+            {
+                in_quotes = 0;
+                quote_char = 0;
+                i++;
+            }
+            else
+            {
+                i++;
+            }
+        }
+    }
+    
+    return (count);
+}
+
+int fill_tokens_with_quotes(char *input, char **tokens)
+{
+    int i, j, k;
+    int in_quotes;
+    char quote_char;
+    int token_start;
+    
+    if (!input || !tokens)
+        return (-1);
+    
+    i = 0;
+    j = 0;
+    in_quotes = 0;
+    quote_char = 0;
+    
+    while (input[i])
+    {
+        // Skip whitespace
+        while (input[i] && (input[i] == ' ' || input[i] == '\t' || input[i] == '\n'))
+            i++;
+        
+        if (!input[i])
+            break;
+        
+        // Start of token
+        token_start = i;
+        
+        // Process token
+        while (input[i] && (in_quotes || (input[i] != ' ' && input[i] != '\t' && input[i] != '\n')))
+        {
+            if (!in_quotes && (input[i] == '"' || input[i] == '\''))
+            {
+                in_quotes = 1;
+                quote_char = input[i];
+                i++;
+            }
+            else if (in_quotes && input[i] == quote_char)
+            {
+                in_quotes = 0;
+                quote_char = 0;
+                i++;
+            }
+            else
+            {
+                i++;
+            }
+        }
+        
+        // Extract token (without quotes)
+        tokens[j] = dl_calloc(i - token_start + 1, sizeof(char));
+        if (!tokens[j])
+            return (-1);
+        
+        k = 0;
+        for (int m = token_start; m < i; m++)
+        {
+            if ((input[m] != '"' && input[m] != '\'') || 
+                (m == token_start && input[m] == quote_char) ||
+                (m == i - 1 && input[m] == quote_char))
+            {
+                tokens[j][k++] = input[m];
+            }
+        }
+        tokens[j][k] = '\0';
+        
+        j++;
+    }
+    
+    tokens[j] = NULL;
     return (0);
 }

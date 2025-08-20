@@ -170,6 +170,8 @@ void unblock_signals(void);
 char *read_input(void);
 int parse_input(char *input);
 int tokenize_input(char *input);
+int count_tokens_with_quotes(char *input);
+int fill_tokens_with_quotes(char *input, char **tokens);
 int expand_environment_variables(void);
 char *expand_environment_string(char *str);
 int expand_wildcards(void);

@@ -25,13 +25,23 @@ int builtin_export(char **args)
             name = args[i];
             value = equal_sign + 1;
             
-            // Validate variable name
+            // Validate variable name first
             if (!is_valid_variable_name(name))
             {
                 print_error("export", "not a valid identifier");
                 *equal_sign = '=';  // Restore original string
                 i++;
                 continue;
+            }
+            
+            // Handle quoted values
+            if (value[0] == '"' || value[0] == '\'')
+            {
+                char quote = value[0];
+                value++; // Skip opening quote
+                char *end_quote = dl_strrchr(value, quote);
+                if (end_quote)
+                    *end_quote = '\0'; // Remove closing quote
             }
             
             // Add or update environment variable
