@@ -23,6 +23,7 @@ size_t dl_strlcat(char *dst, const char *src, size_t dstsize);
 char *dl_strchr(const char *s, int c);
 char *dl_strrchr(const char *s, int c);
 int dl_strncmp(const char *s1, const char *s2, size_t n);
+int dl_strcmp(const char *s1, const char *s2);
 char *dl_strnstr(const char *haystack, const char *needle, size_t len);
 char *dl_strjoin(char const *s1, char const *s2);
 char *dl_strtrim(char const *s1, char const *set);

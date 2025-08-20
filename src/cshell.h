@@ -198,6 +198,13 @@ int fill_tokens_with_quotes(char *input, char **tokens);
 int expand_environment_variables(void);
 char *expand_environment_string(char *str);
 int expand_wildcards(void);
+int wild_card_check(char *pattern);
+int match_pattern(const char *filename, const char *pattern);
+int match_glob_pattern(const char *filename, const char *pattern);
+int match_question_pattern(const char *filename, const char *pattern);
+int match_bracket_pattern(const char *filename, const char *pattern);
+char **expand_wildcard_pattern(const char *pattern);
+void sort_string_array(char **array, int count);
 int validate_syntax(void);
 
 // Parsing

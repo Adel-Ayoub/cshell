@@ -74,6 +74,7 @@ LIBDL_SRC = $(LIBDLDIR)/dl_atoi.c \
             $(LIBDLDIR)/dl_putstr_fd.c \
             $(LIBDLDIR)/dl_split.c \
             $(LIBDLDIR)/dl_strchr.c \
+            $(LIBDLDIR)/dl_strcmp.c \
             $(LIBDLDIR)/dl_strdup.c \
             $(LIBDLDIR)/dl_striteri.c \
             $(LIBDLDIR)/dl_strjoin.c \
