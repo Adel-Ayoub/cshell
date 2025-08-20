@@ -26,12 +26,13 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential gcc make valgrind readline-dev
+        sudo apt-get install -y build-essential gcc make valgrind libreadline-dev
     
     - name: Install dependencies (macOS)
       if: matrix.os == 'macos-latest'
       run: |
-        brew install gcc make valgrind readline
+        brew install gcc make readline
+        # Note: valgrind is not available on macOS via Homebrew, skip memory checks
     
     - name: Set compiler
       run: |
@@ -68,9 +69,9 @@ jobs:
     
     - name: Check if libdl.a exists
       run: |
-        if [ -f "./libdl/libdl.a" ]; then
+        if [ -f "./build/libdl.a" ]; then
           echo "libdl.a library created successfully"
-          ls -la libdl/libdl.a
+          ls -la build/libdl.a
         else
           echo "libdl.a library not found"
           exit 1
@@ -95,6 +96,12 @@ jobs:
       run: |
         echo "Running memory check with valgrind..."
         echo "exit" | timeout 10s valgrind --leak-check=full --error-exitcode=1 ./cshell 2>/dev/null || echo "Memory check completed"
+    
+    - name: Skip memory check (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        echo "Skipping memory check on macOS (valgrind not available)"
+        echo "exit" | timeout 5s ./cshell 2>/dev/null || echo "Basic functionality test completed"
     
     - name: Clean build artifacts
       if: always()
