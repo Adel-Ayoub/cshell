@@ -100,10 +100,17 @@ LIBDL_SRC = $(LIBDLDIR)/dl_atoi.c \
             $(LIBDLDIR)/get_next_line.c \
             $(LIBDLDIR)/get_next_line_utils.c
 
-# macOS readline paths (Homebrew)
-READLINE_DIR = /opt/homebrew/opt/readline
-READLINE_INC = -I$(READLINE_DIR)/include -I$(SRCDIR)
-READLINE_LIB = -L$(READLINE_DIR)/lib -lreadline
+# Cross-platform readline paths
+# macOS (Homebrew)
+ifeq ($(shell uname -s),Darwin)
+    READLINE_DIR = /opt/homebrew/opt/readline
+    READLINE_INC = -I$(READLINE_DIR)/include -I$(SRCDIR)
+    READLINE_LIB = -L$(READLINE_DIR)/lib -lreadline
+else
+    # Linux (Ubuntu/Debian)
+    READLINE_INC = -I/usr/include -I$(SRCDIR)
+    READLINE_LIB = -lreadline
+endif
 
 .PHONY: all clean fclean re bonus
 
