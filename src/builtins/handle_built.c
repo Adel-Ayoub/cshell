@@ -15,7 +15,6 @@ int is_built_in(char *command)
 
 int find_the_paths(char *command)
 {
-    char *path;
     char *path_copy;
     char *dir;
     char *full_path;
@@ -39,28 +38,26 @@ int find_the_paths(char *command)
     
     path_copy = dl_strdup(path_env);
     if (!path_copy)
-    {
-        free(path_env);
         return (0);
-    }
     
-    path = path_copy;
-    while ((dir = dl_strtok(path, ":")))
+    // First call to strtok
+    dir = dl_strtok(path_copy, ":");
+    while (dir)
     {
         full_path = dl_strjoin(dl_strjoin(dir, "/"), command);
         if (full_path && access(full_path, X_OK) == 0)
         {
             free(full_path);
             free(path_copy);
-            free(path_env);
             return (1);
         }
         if (full_path)
             free(full_path);
-        path = NULL;  // Continue with same string
+        
+        // Continue with subsequent calls
+        dir = dl_strtok(NULL, ":");
     }
     
     free(path_copy);
-    free(path_env);
     return (0);
 }

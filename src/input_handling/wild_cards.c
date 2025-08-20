@@ -19,8 +19,85 @@ int wild_card_check(char *pattern)
 
 int expand_wildcards(void)
 {
-    // TODO: Implement wildcard expansion for command arguments
-    // This will be called during command parsing to expand wildcards in arguments
+    if (!g_data.args_array)
+        return (0);
+    
+    int i = 0;
+    int expanded_count = 0;
+    
+    // First pass: count how many arguments we'll have after expansion
+    while (g_data.args_array[i])
+    {
+        if (wild_card_check(g_data.args_array[i]))
+        {
+            char **expanded = expand_wildcard_pattern(g_data.args_array[i]);
+            if (expanded)
+            {
+                int j = 0;
+                while (expanded[j])
+                {
+                    expanded_count++;
+                    j++;
+                }
+                free_string_array(expanded);
+            }
+        }
+        else
+        {
+            expanded_count++;
+        }
+        i++;
+    }
+    
+    if (expanded_count == 0)
+        return (0);
+    
+    // Allocate new array for expanded arguments
+    char **new_args = dl_calloc(expanded_count + 1, sizeof(char *));
+    if (!new_args)
+        return (-1);
+    
+    // Second pass: fill the new array with expanded arguments
+    i = 0;
+    int new_index = 0;
+    
+    while (g_data.args_array[i])
+    {
+        if (wild_card_check(g_data.args_array[i]))
+        {
+            char **expanded = expand_wildcard_pattern(g_data.args_array[i]);
+            if (expanded)
+            {
+                int j = 0;
+                while (expanded[j])
+                {
+                    new_args[new_index] = dl_strdup(expanded[j]);
+                    new_index++;
+                    j++;
+                }
+                free_string_array(expanded);
+            }
+            else
+            {
+                // No matches found, keep original pattern
+                new_args[new_index] = dl_strdup(g_data.args_array[i]);
+                new_index++;
+            }
+        }
+        else
+        {
+            // No wildcards, copy as-is
+            new_args[new_index] = dl_strdup(g_data.args_array[i]);
+            new_index++;
+        }
+        i++;
+    }
+    
+    // Free old array and replace with new one
+    free_string_array(g_data.args_array);
+    g_data.args_array = new_args;
+    g_data.args_count = expanded_count;
+    
     return (0);
 }
 
