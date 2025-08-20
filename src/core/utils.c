@@ -171,11 +171,11 @@ void cleanup_all(void)
     if (g_data.child_pids)
         free(g_data.child_pids);
     
-            // Free wildcards
-        if (g_data.wildcards)
-            free_wildcards(g_data.wildcards);
-        if (g_data.wild_help)
-            free_wild_help(g_data.wild_help);
+    // Free wildcards
+    if (g_data.wildcards)
+        free_wildcards(g_data.wildcards);
+    if (g_data.wild_help)
+        free_wild_help(g_data.wild_help);
     
     // Free command tree
     if (g_data.command_tree)
