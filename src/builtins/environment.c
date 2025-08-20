@@ -102,3 +102,67 @@ int update_shell_level(void)
     g_data.shell_level = current_level;
     return (0);
 }
+
+int set_environment_variable(char *name, char *value)
+{
+    int i;
+    int name_len;
+    char *new_var;
+    
+    if (!name || !value)
+        return (-1);
+    
+    name_len = dl_strlen(name);
+    
+    // Check if variable already exists
+    i = 0;
+    while (g_data.env[i])
+    {
+        if (dl_strncmp(g_data.env[i], name, name_len) == 0 && 
+            g_data.env[i][name_len] == '=')
+        {
+            // Update existing variable
+            free(g_data.env[i]);
+            new_var = dl_strjoin(dl_strjoin(name, "="), value);
+            g_data.env[i] = new_var;
+            return (0);
+        }
+        i++;
+    }
+    
+    // Add new variable
+    return (add_environment_variable(name, value));
+}
+
+int unset_environment_variable(char *name)
+{
+    int i;
+    int name_len;
+    
+    if (!name || !g_data.env)
+        return (-1);
+    
+    name_len = dl_strlen(name);
+    
+    i = 0;
+    while (g_data.env[i])
+    {
+        if (dl_strncmp(g_data.env[i], name, name_len) == 0 && 
+            g_data.env[i][name_len] == '=')
+        {
+            // Remove variable by shifting remaining elements
+            free(g_data.env[i]);
+            while (g_data.env[i + 1])
+            {
+                g_data.env[i] = g_data.env[i + 1];
+                i++;
+            }
+            g_data.env[i] = NULL;
+            g_data.env_size--;
+            return (0);
+        }
+        i++;
+    }
+    
+    return (0); // Variable not found, but that's not an error
+}

@@ -22,7 +22,7 @@ int builtin_unset(char **args)
         }
         else
         {
-            if (remove_environment_variable(args[i]) != 0)
+            if (unset_environment_variable(args[i]) != 0)
             {
                 print_error("unset", "failed to unset variable");
                 result = EXIT_FAILURE;
@@ -34,55 +34,4 @@ int builtin_unset(char **args)
     return (result);
 }
 
-int remove_environment_variable(char *name)
-{
-    int i;
-    int j;
-    char **new_env;
 
-    if (!name || !g_data.env)
-        return (-1);
-    
-    // Find variable to remove
-    i = 0;
-    while (g_data.env[i])
-    {
-        if (dl_strncmp(g_data.env[i], name, dl_strlen(name)) == 0 &&
-            g_data.env[i][dl_strlen(name)] == '=')
-        {
-            // Create new environment array
-            new_env = (char **)dl_calloc(g_data.env_size, sizeof(char *));
-            if (!new_env)
-                return (-1);
-            
-            // Copy variables before the one to remove
-            j = 0;
-            while (j < i)
-            {
-                new_env[j] = g_data.env[j];
-                j++;
-            }
-            
-            // Copy variables after the one to remove
-            while (g_data.env[j + 1])
-            {
-                new_env[j] = g_data.env[j + 1];
-                j++;
-            }
-            
-            // Free the removed variable
-            free(g_data.env[i]);
-            
-            // Replace old environment
-            free(g_data.env);
-            g_data.env = new_env;
-            g_data.env_size--;
-            
-            return (0);
-        }
-        i++;
-    }
-    
-    // Variable not found
-    return (0);
-}

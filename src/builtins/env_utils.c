@@ -23,7 +23,16 @@ int builtin_echo(char **args)
     // Print arguments
     while (args[i])
     {
-        dl_putstr_fd(args[i], STDOUT_FILENO);
+        char *expanded_arg = expand_environment_string(args[i]);
+        if (expanded_arg)
+        {
+            dl_putstr_fd(expanded_arg, STDOUT_FILENO);
+            free(expanded_arg);
+        }
+        else
+        {
+            dl_putstr_fd(args[i], STDOUT_FILENO);
+        }
         
         // Add space between arguments (except for the last one)
         if (args[i + 1])

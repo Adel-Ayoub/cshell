@@ -171,6 +171,7 @@ char *read_input(void);
 int parse_input(char *input);
 int tokenize_input(char *input);
 int expand_environment_variables(void);
+char *expand_environment_string(char *str);
 int expand_wildcards(void);
 int validate_syntax(void);
 
@@ -222,6 +223,8 @@ int add_environment_variable(char *name, char *value);
 int remove_environment_variable(char *name);
 char *get_environment_variable(char *name);
 int update_shell_level(void);
+int set_environment_variable(char *name, char *value);
+int unset_environment_variable(char *name);
 
 // Memory management
 void cleanup_all(void);
