@@ -8,7 +8,8 @@ LIBDLDIR = libdl
 # Source files organized by module
 CORE_SRC = $(SRCDIR)/core/main.c \
            $(SRCDIR)/core/signal_handlers.c \
-           $(SRCDIR)/core/utils.c
+           $(SRCDIR)/core/utils.c \
+           $(SRCDIR)/core/trinary_tree.c
 
 BUILTINS_SRC = $(SRCDIR)/builtins/built.c \
                $(SRCDIR)/builtins/directory.c \
