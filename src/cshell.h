@@ -86,6 +86,25 @@ typedef struct s_split {
     int z;
 } t_split;
 
+// Job control constants
+#define MAX_JOBS 100
+
+// Job status constants
+#define JOB_NONE 0
+#define JOB_RUNNING 1
+#define JOB_STOPPED 2
+#define JOB_COMPLETED 3
+
+// Job structure
+typedef struct s_job
+{
+    pid_t pid;
+    char *command;
+    int status;
+    int exit_status;
+    time_t start_time;
+} t_job;
+
 typedef struct s_error {
     int syntax_error;
     int quote_error;
@@ -146,6 +165,10 @@ typedef struct s_data {
     // Here-doc
     char **here_docs;
     int here_doc_count;
+    
+    // Job control
+    t_job *background_jobs;
+    int job_count;
 } t_data;
 
 // Global data structure
@@ -214,6 +237,10 @@ int builtin_history(char **args);
 int builtin_type(char **args);
 int builtin_help(char **args);
 int builtin_help_specific(char *command);
+int builtin_jobs(char **args);
+int add_background_job(pid_t pid, char *command);
+int remove_background_job(pid_t pid);
+void update_job_status(pid_t pid, int status);
 char *find_command_path(char *command);
 
 // Builtin helpers

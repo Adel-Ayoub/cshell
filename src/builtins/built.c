@@ -6,6 +6,7 @@ int builtin_env_wrapper(char **args);
 int builtin_history(char **args);
 int builtin_type(char **args);
 int builtin_help(char **args);
+int builtin_jobs(char **args);
 
 static char *builtin_names[] = {
     "echo",
@@ -17,7 +18,8 @@ static char *builtin_names[] = {
     "exit",
     "history",
     "type",
-    "help"
+    "help",
+    "jobs"
 };
 
 static int (*builtin_functions[])(char **) = {
@@ -30,7 +32,8 @@ static int (*builtin_functions[])(char **) = {
     builtin_exit,
     builtin_history,
     builtin_type,
-    builtin_help
+    builtin_help,
+    builtin_jobs
 };
 
 int builtin_pwd_wrapper(char **args)
@@ -53,7 +56,7 @@ int is_builtin(char *command)
         return (0);
     
     i = 0;
-    while (i < 10)
+    while (i < 11)
     {
         if (dl_strncmp(command, builtin_names[i], dl_strlen(builtin_names[i]) + 1) == 0)
             return (1);
@@ -70,7 +73,7 @@ int execute_builtin(char **args)
         return (EXIT_FAILURE);
     
     i = 0;
-    while (i < 10)
+    while (i < 11)
     {
         if (dl_strncmp(args[0], builtin_names[i], dl_strlen(builtin_names[i]) + 1) == 0)
         {

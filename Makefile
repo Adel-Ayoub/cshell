@@ -20,7 +20,8 @@ BUILTINS_SRC = $(SRCDIR)/builtins/built.c \
                $(SRCDIR)/builtins/handle_built.c \
                $(SRCDIR)/builtins/help.c \
                $(SRCDIR)/builtins/history.c \
-               $(SRCDIR)/builtins/type.c
+               $(SRCDIR)/builtins/type.c \
+               $(SRCDIR)/builtins/jobs.c
 
 COMMANDS_SRC = $(SRCDIR)/commands/finding_execs.c \
                $(SRCDIR)/commands/handle_commands.c \
