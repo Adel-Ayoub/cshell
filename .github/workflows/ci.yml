@@ -42,13 +42,6 @@ jobs:
           echo "CC=gcc" >> $GITHUB_ENV
         fi
     
-    - name: Build libdl
-      run: |
-        echo "Building libdl library..."
-        make -C libdl clean
-        make -C libdl all
-        ls -la libdl/
-    
     - name: Build project
       run: |
         echo "Building cshell project..."
