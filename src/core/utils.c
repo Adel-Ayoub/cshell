@@ -26,6 +26,9 @@ int setup_shell(char **env)
     g_data.exit_status = EXIT_SUCCESS;
     g_data.last_exit_status = EXIT_SUCCESS;
     
+    // Initialize trinary tree
+    g_data.trinary_tree = NULL;
+    
     return (0);
 }
 
@@ -70,15 +73,30 @@ void shell_loop(void)
         if (g_data.interactive_mode && *input)
             add_history(input);
         
-        // Process input
-        if (parse_input(input) == 0)
+        // Set the input line for trinary tree processing
+        g_data.input_line = dl_strdup(input);
+        
+        // Process input using trinary tree for command chaining
+        if (go_through_list() == 0)
         {
-            if (execute_commands() != 0)
-                g_data.exit_status = EXIT_FAILURE;
+            g_data.exit_status = EXIT_SYNTAX_ERROR;
         }
         else
         {
-            g_data.exit_status = EXIT_SYNTAX_ERROR;
+            // Execute the trinary tree
+            traveler(g_data.trinary_tree);
+            
+            // Clean up the tree
+            if (g_data.trinary_tree)
+                empty_tree(g_data.trinary_tree);
+            g_data.trinary_tree = NULL;
+        }
+        
+        // Clean up input line
+        if (g_data.input_line)
+        {
+            free(g_data.input_line);
+            g_data.input_line = NULL;
         }
         
         // Cleanup input
@@ -143,6 +161,12 @@ char *get_prompt(void)
     
     return (prompt ? prompt : dl_strdup("cshell$ "));
 }
+
+
+
+
+
+
 
 void cleanup_all(void)
 {
