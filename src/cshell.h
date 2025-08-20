@@ -212,6 +212,8 @@ int builtin_unset(char **args);
 int builtin_exit(char **args);
 int builtin_history(char **args);
 int builtin_type(char **args);
+int builtin_help(char **args);
+int builtin_help_specific(char *command);
 char *find_command_path(char *command);
 
 // Builtin helpers
