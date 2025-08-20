@@ -210,6 +210,9 @@ int builtin_env(void);
 int builtin_export(char **args);
 int builtin_unset(char **args);
 int builtin_exit(char **args);
+int builtin_history(char **args);
+int builtin_type(char **args);
+char *find_command_path(char *command);
 
 // Builtin helpers
 int is_builtin(char *command);

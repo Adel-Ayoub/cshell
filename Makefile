@@ -18,7 +18,8 @@ BUILTINS_SRC = $(SRCDIR)/builtins/built.c \
                $(SRCDIR)/builtins/env_utils.c \
                $(SRCDIR)/builtins/exit_val_calc.c \
                $(SRCDIR)/builtins/handle_built.c \
-               $(SRCDIR)/builtins/history.c
+               $(SRCDIR)/builtins/history.c \
+               $(SRCDIR)/builtins/type.c
 
 COMMANDS_SRC = $(SRCDIR)/commands/finding_execs.c \
                $(SRCDIR)/commands/handle_commands.c \
