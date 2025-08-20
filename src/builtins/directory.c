@@ -32,8 +32,7 @@ int builtin_cd(char **args)
     char *target_dir;
     char *old_pwd;
     char *new_pwd;
-    char *pwd_var;
-    char *oldpwd_var;
+    char *expanded_path;
 
     // Get target directory
     if (!args[1] || dl_strncmp(args[1], "~", 2) == 0)
@@ -56,7 +55,35 @@ int builtin_cd(char **args)
     }
     else
     {
-        target_dir = dl_strdup(args[1]);
+        // Handle tilde expansion
+        if (args[1][0] == '~')
+        {
+            char *home = get_environment_variable("HOME");
+            if (home)
+            {
+                if (args[1][1] == '/' || args[1][1] == '\0')
+                {
+                    // ~/path or just ~
+                    expanded_path = dl_strjoin(home, args[1] + 1);
+                    target_dir = expanded_path;
+                }
+                else
+                {
+                    // ~username (not implemented yet, treat as literal)
+                    target_dir = dl_strdup(args[1]);
+                }
+                free(home);
+            }
+            else
+            {
+                print_error("cd", "HOME not set");
+                return (EXIT_FAILURE);
+            }
+        }
+        else
+        {
+            target_dir = dl_strdup(args[1]);
+        }
     }
     
     // Get current directory before changing
@@ -81,19 +108,18 @@ int builtin_cd(char **args)
     new_pwd = getcwd(NULL, 0);
     if (new_pwd)
     {
-        pwd_var = dl_strjoin("PWD=", new_pwd);
-        oldpwd_var = dl_strjoin("OLDPWD=", old_pwd);
-        
-        if (pwd_var && oldpwd_var)
+        // Update PWD
+        if (set_environment_variable("PWD", new_pwd) != 0)
         {
-            add_environment_variable("PWD", new_pwd);
-            add_environment_variable("OLDPWD", old_pwd);
+            print_error("cd", "failed to update PWD");
         }
         
-        if (pwd_var)
-            free(pwd_var);
-        if (oldpwd_var)
-            free(oldpwd_var);
+        // Update OLDPWD
+        if (set_environment_variable("OLDPWD", old_pwd) != 0)
+        {
+            print_error("cd", "failed to update OLDPWD");
+        }
+        
         free(new_pwd);
     }
     
@@ -101,7 +127,12 @@ int builtin_cd(char **args)
     if (args[1] && dl_strncmp(args[1], "-", 2) == 0)
         dl_putendl_fd(target_dir, STDOUT_FILENO);
     
+    // Cleanup
     free(old_pwd);
-    free(target_dir);
+    if (target_dir != expanded_path) // Don't double-free if they're the same
+        free(target_dir);
+    if (expanded_path && target_dir == expanded_path)
+        free(expanded_path);
+    
     return (EXIT_SUCCESS);
 }
