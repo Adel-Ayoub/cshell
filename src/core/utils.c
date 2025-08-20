@@ -73,7 +73,7 @@ void shell_loop(void)
         if (g_data.interactive_mode && *input)
             add_history(input);
         
-        // Set the input line for trinary tree processing
+                // Set the input line for trinary tree processing
         g_data.input_line = dl_strdup(input);
         
         // Process input using trinary tree for command chaining
@@ -88,8 +88,10 @@ void shell_loop(void)
             
             // Clean up the tree
             if (g_data.trinary_tree)
+            {
                 empty_tree(g_data.trinary_tree);
-            g_data.trinary_tree = NULL;
+                g_data.trinary_tree = NULL;
+            }
         }
         
         // Clean up input line

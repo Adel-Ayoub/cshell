@@ -68,6 +68,11 @@ int execute_external(char **args)
             g_data.last_exit_status = 128 + WTERMSIG(status);
     }
     
+    // Debug: print status before return
+    dl_putstr_fd("Command completed with status: ", STDOUT_FILENO);
+    dl_putstr_fd(dl_itoa(g_data.last_exit_status), STDOUT_FILENO);
+    dl_putendl_fd("", STDOUT_FILENO);
+    
     return (g_data.last_exit_status);
 }
 
