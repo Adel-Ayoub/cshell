@@ -73,6 +73,46 @@ void shell_loop(void)
             break;
         }
         
+        // In non-interactive mode, exit after processing one command
+        if (!g_data.interactive_mode)
+        {
+            // Process this single command
+            g_data.input_line = dl_strdup(input);
+            
+            if (go_through_list() == 0)
+            {
+                g_data.exit_status = EXIT_SYNTAX_ERROR;
+            }
+            else
+            {
+                // Execute the trinary tree
+                traveler(g_data.trinary_tree);
+                
+                // Clean up the tree
+                if (g_data.trinary_tree)
+                {
+                    empty_tree(g_data.trinary_tree);
+                    g_data.trinary_tree = NULL;
+                }
+            }
+            
+            // Clean up input line
+            if (g_data.input_line)
+            {
+                free(g_data.input_line);
+                g_data.input_line = NULL;
+            }
+            
+            // Cleanup input
+            free(input);
+            
+            // Reset error state
+            reset_error_state();
+            
+            // Exit after processing one command in non-interactive mode
+            break;
+        }
+        
         // Add to history if interactive
         if (g_data.interactive_mode && *input)
             add_history(input);
@@ -119,6 +159,10 @@ char *read_input(void)
     size_t bufsize = 0;
     ssize_t line_size;
 
+    // Check if stdin is at EOF
+    if (feof(stdin))
+        return (NULL);
+
     line_size = getline(&line, &bufsize, stdin);
     if (line_size <= 0)
     {
@@ -128,7 +172,7 @@ char *read_input(void)
     }
     
     // Remove newline
-    if (line[line_size - 1] == '\n')
+    if (line_size > 0 && line[line_size - 1] == '\n')
         line[line_size - 1] = '\0';
     
     return (line);
