@@ -11,10 +11,19 @@ int init_pipes(void)
     if (g_data.pipe_amount <= 0)
         return (0);
     
+    // Allocate child PIDs array
+    g_data.child_pids = (pid_t *)dl_calloc(g_data.cmd_amount, sizeof(pid_t));
+    if (!g_data.child_pids)
+        return (-1);
+    
     // Allocate pipe array
     g_data.pipes = (int **)dl_calloc(g_data.cmd_amount - 1, sizeof(int *));
     if (!g_data.pipes)
+    {
+        free(g_data.child_pids);
+        g_data.child_pids = NULL;
         return (-1);
+    }
     
     // Create pipes
     for (i = 0; i < g_data.cmd_amount - 1; i++)
