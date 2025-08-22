@@ -2,18 +2,43 @@
 
 int execute_commands(void)
 {
+    int ret;
+    
     if (!g_data.args_array || !g_data.args_array[0])
         return (EXIT_SUCCESS);
+    
+    // Setup redirections before execution (only if there are redirections)
+    if (g_data.redirections)
+    {
+        if (setup_redirections() != 0)
+            return (EXIT_FAILURE);
+        
+        // Apply redirections to file descriptors
+        if (apply_redirections() != 0)
+        {
+            cleanup_redirections();
+            return (EXIT_FAILURE);
+        }
+    }
     
     // Check if it's a builtin
     if (is_builtin(g_data.args_array[0]))
     {
-        return (execute_builtin(g_data.args_array));
+        ret = execute_builtin(g_data.args_array);
     }
     else
     {
-        return (execute_external(g_data.args_array));
+        ret = execute_external(g_data.args_array);
     }
+    
+    // Restore file descriptors and cleanup redirections (only if there were redirections)
+    if (g_data.redirections)
+    {
+        restore_redirections();
+        cleanup_redirections();
+    }
+    
+    return (ret);
 }
 
 int execute_external(char **args)
