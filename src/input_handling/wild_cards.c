@@ -1,6 +1,7 @@
 #include "cshell.h"
 #include <dirent.h>
 #include <sys/stat.h>
+#include <limits.h>
 
 int wild_card_check(char *pattern)
 {
@@ -180,16 +181,45 @@ char **expand_wildcard_pattern(const char *pattern)
         if (dl_strcmp(entry->d_name, ".") == 0 || dl_strcmp(entry->d_name, "..") == 0)
             continue;
         
+        // Skip subdirectories - only check files for wildcard patterns
+        struct stat st;
+        char full_path[PATH_MAX];
+        if (allocated_dir)
+        {
+            // Construct full path: dir_path + "/" + entry->d_name
+            int dir_len = dl_strlen(dir_path);
+            int name_len = dl_strlen(entry->d_name);
+            
+
+            
+            if (dir_len + 1 + name_len < PATH_MAX)
+            {
+                dl_strcpy(full_path, dir_path);
+                full_path[dir_len] = '/';
+                full_path[dir_len + 1] = '\0';
+                dl_strcpy(full_path + dir_len + 1, entry->d_name);
+            }
+            else
+            {
+                full_path[0] = '\0';  // Path too long
+            }
+        }
+        else
+            dl_strcpy(full_path, entry->d_name);
+        
+        if (stat(full_path, &st) == 0 && S_ISDIR(st.st_mode))
+            continue;  // Skip directories
+        
         // Check if filename matches pattern
         if (match_pattern(entry->d_name, file_pattern))
         {
             // If we're in a subdirectory, include the full path
             if (allocated_dir)
             {
-                char *full_path = dl_strjoin(dl_strjoin(dir_path, "/"), entry->d_name);
-                if (full_path)
+                char *full_path_result = dl_strjoin(dl_strjoin(dir_path, "/"), entry->d_name);
+                if (full_path_result)
                 {
-                    matches[match_count] = full_path;
+                    matches[match_count] = full_path_result;
                     match_count++;
                 }
             }
@@ -198,11 +228,9 @@ char **expand_wildcard_pattern(const char *pattern)
                 matches[match_count] = dl_strdup(entry->d_name);
                 if (matches[match_count])
                     match_count++;
+                }
             }
         }
-        
-
-    }
     
     closedir(dir);
     
@@ -257,17 +285,13 @@ int match_pattern(const char *filename, const char *pattern)
         return match_glob_pattern(filename, pattern);
     }
     
-    // Handle ? pattern (matches any single character)
-    if (dl_strchr(pattern, '?') != NULL)
+    // Handle ? pattern and [set] pattern (matches any single character or character set)
+    if (dl_strchr(pattern, '?') != NULL || dl_strchr(pattern, '[') != NULL)
     {
         return match_question_pattern(filename, pattern);
     }
     
-    // Handle [set] pattern (matches any character in the set)
-    if (dl_strchr(pattern, '[') != NULL)
-    {
-        return match_bracket_pattern(filename, pattern);
-    }
+
     
     // No wildcards, exact match
     return (dl_strcmp(filename, pattern) == 0);
@@ -317,49 +341,52 @@ int match_question_pattern(const char *filename, const char *pattern)
     
     for (int i = 0; i < pattern_len; i++)
     {
-        if (pattern[i] != '?' && pattern[i] != filename[i])
+        if (pattern[i] == '?')
+            continue;  // ? matches any character
+        else if (pattern[i] == '[')
+        {
+            // Handle bracket pattern
+            int j = i + 1;
+            int negated = 0;
+            
+            // Check for negation
+            if (pattern[j] == '^')
+            {
+                negated = 1;
+                j++;
+            }
+            
+            // Find closing bracket
+            while (pattern[j] && pattern[j] != ']')
+                j++;
+            
+            if (pattern[j] != ']')
+                return (0);  // Invalid pattern
+            
+            // Check if character is in the set
+            int found = 0;
+            for (int k = i + 1; k < j; k++)
+            {
+                if (negated && pattern[k] == '^')
+                    continue;
+                
+                if (filename[i] == pattern[k])
+                {
+                    found = 1;
+                    break;
+                }
+            }
+            
+            if (negated ? found : !found)
+                return (0);  // Character not in set (or in negated set)
+            
+            i = j;  // Skip to after the bracket pattern
+        }
+        else if (pattern[i] != filename[i])
             return (0);
     }
     
     return (1);
 }
 
-// Match [set] pattern
-int match_bracket_pattern(const char *filename, const char *pattern)
-{
-    if (!filename || !pattern || pattern[0] != '[')
-        return (0);
-    
-    int negated = 0;
-    int i = 1;
-    
-    // Check for negation
-    if (pattern[i] == '^')
-    {
-        negated = 1;
-        i++;
-    }
-    
-    // Find closing bracket
-    while (pattern[i] && pattern[i] != ']')
-        i++;
-    
-    if (pattern[i] != ']')
-        return (0);  // Invalid pattern
-    
-    // Check if character is in the set
-    int found = 0;
-    for (int j = 1; (negated ? j < i : j < i); j++)
-    {
-        if (negated && pattern[j] == '^')
-            continue;
-        
-        if (filename[0] == pattern[j])
-        {
-            found = 1;
-            break;
-        }
-    }
-    
-    return (negated ? !found : found);
-}
+
