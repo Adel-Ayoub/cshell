@@ -164,6 +164,7 @@ typedef struct s_data {
     int child_count;
     int cmd_amount;
     int pipe_amount;
+    int check;  // For pipe file descriptor setup status
     
     // Parsing state
     t_split split_state;
@@ -271,12 +272,14 @@ void cleanup_pipes(void);
 int handle_pipe(char *cmd_str);
 int handle_pipe_direct(char *cmd_str);
 int init_pipes(void);
-void go_through_pipeline(void);
+void go_through_pipeline(char **commands);
 void the_piper(int cmd_index);
-void the_kindergarden(int cmd_index);
+void the_kindergarden(int cmd_index, char *cmd_str);
+int prepare_command(int cmd_index, char *cmd_str);
 void close_pipeline(void);
 void free_commands(void);
 char **parse_pipe_commands(char *cmd_str);
+char **parse_single_command(char *cmd_str);
 t_redi *find_redirection_node(int type);
 
 // Cross-module helpers
