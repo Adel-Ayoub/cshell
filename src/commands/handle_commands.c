@@ -7,6 +7,10 @@ int execute_commands(void)
     if (!g_data.args_array || !g_data.args_array[0])
         return (EXIT_SUCCESS);
     
+    // Process wildcards before execution (following minishell pattern)
+    if (expand_wildcards() != 0)
+        return (EXIT_FAILURE);
+    
     // Setup redirections before execution (only if there are redirections)
     if (g_data.redirections)
     {
@@ -93,10 +97,7 @@ int execute_external(char **args)
             g_data.last_exit_status = 128 + WTERMSIG(status);
     }
     
-    // Debug: print status before return
-    dl_putstr_fd("Command completed with status: ", STDOUT_FILENO);
-    dl_putstr_fd(dl_itoa(g_data.last_exit_status), STDOUT_FILENO);
-    dl_putendl_fd("", STDOUT_FILENO);
+
     
     return (g_data.last_exit_status);
 }
