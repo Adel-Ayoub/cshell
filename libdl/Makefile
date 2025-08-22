@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -Werror -g
-NAME = libdl.a
+NAME = ../build/libdl.a
 SRCDIR = .
 BUILDDIR = obj
 
@@ -8,7 +8,7 @@ BUILDDIR = obj
 SRC = dl_atoi.c dl_bzero.c dl_calloc.c dl_isalnum.c dl_isalpha.c dl_isascii.c \
       dl_isdigit.c dl_isprint.c dl_itoa.c dl_memchr.c dl_memcmp.c dl_memcpy.c \
       dl_memmove.c dl_memset.c dl_putchar_fd.c dl_putendl_fd.c dl_putnbr_fd.c \
-      dl_putstr_fd.c dl_split.c dl_strchr.c dl_strcmp.c dl_strdup.c dl_striteri.c \
+      dl_putstr_fd.c dl_split.c dl_strchr.c dl_strcmp.c dl_strcpy.c dl_strdup.c dl_striteri.c \
       dl_strjoin.c dl_strlcat.c dl_strlcpy.c dl_strlen.c dl_strmapi.c \
       dl_strncmp.c dl_strncpy.c dl_strnstr.c dl_strrchr.c dl_strtok.c dl_strtrim.c dl_substr.c \
       dl_tolower.c dl_toupper.c dl_lstadd_back_bonus.c dl_lstadd_front_bonus.c \
@@ -24,6 +24,7 @@ OBJ = $(SRC:%.c=$(BUILDDIR)/%.o)
 all: $(NAME)
 
 $(NAME): $(OBJ)
+	@mkdir -p ../build
 	ar rcs $@ $^
 
 $(BUILDDIR)/%.o: %.c

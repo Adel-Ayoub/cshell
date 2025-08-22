@@ -76,6 +76,7 @@ LIBDL_SRC = $(LIBDLDIR)/dl_atoi.c \
             $(LIBDLDIR)/dl_split.c \
             $(LIBDLDIR)/dl_strchr.c \
             $(LIBDLDIR)/dl_strcmp.c \
+            $(LIBDLDIR)/dl_strcpy.c \
             $(LIBDLDIR)/dl_strdup.c \
             $(LIBDLDIR)/dl_striteri.c \
             $(LIBDLDIR)/dl_strjoin.c \
@@ -123,9 +124,7 @@ $(NAME): $(LIBDL) $(OBJ)
 	$(CC) $(OBJ) $(LIBDL) $(READLINE_LIB) -o $@
 
 $(LIBDL): $(LIBDL_SRC)
-	@mkdir -p build
 	@make -C $(LIBDLDIR)
-	@mv $(LIBDLDIR)/libdl.a build/
 
 $(BUILDDIR)/%.o: %.c
 	@mkdir -p $(dir $@)
