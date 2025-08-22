@@ -5,12 +5,7 @@ int parse_input(char *input)
     if (!input)
         return (-1);
     
-    // Store input line
-    g_data.input_line = dl_strdup(input);
-    if (!g_data.input_line)
-        return (-1);
-    
-    // Tokenize input
+    // Use the input parameter directly for tokenization, don't modify g_data.input_line
     if (tokenize_input(input) != 0)
         return (-1);
     
@@ -22,12 +17,7 @@ int parse_input(char *input)
     if (expand_wildcards() != 0)
         return (-1);
     
-    // Check if there are pipes in the input
-    if (dl_strchr(input, '|'))
-    {
-        // Handle pipe command (avoid recursion by calling directly)
-        return (handle_pipe_direct(input));
-    }
+    // Note: Pipe handling is deferred to execution phase through trinary tree
     
     // Check if there are redirections in the input before parsing
     if (dl_strchr(input, '<') || dl_strchr(input, '>'))
@@ -206,12 +196,7 @@ int fill_tokens_with_quotes(char *input, char **tokens)
         k = 0;
         for (int m = token_start; m < i; m++)
         {
-            if ((input[m] != '"' && input[m] != '\'') || 
-                (m == token_start && input[m] == quote_char) ||
-                (m == i - 1 && input[m] == quote_char))
-            {
-                tokens[j][k++] = input[m];
-            }
+            tokens[j][k++] = input[m];
         }
         tokens[j][k] = '\0';
         

@@ -87,6 +87,7 @@ t_trinary *create_level(char *str, t_trinary *back, t_trinary *up, int var)
         if (remaining)
         {
             new->next = create_level(remaining, new, up, 0);
+            // Note: remaining memory is now owned by the next node, don't free it here
         }
         
         return (new);
@@ -104,7 +105,15 @@ void exec_node(t_trinary *current)
     if (!current || !current->content)
         return;
     
-    // Parse the command content
+    // Check if the command contains pipes
+    if (dl_strchr(current->content, '|'))
+    {
+        // Handle pipe command directly
+        current->ret = handle_pipe_direct(current->content);
+        return;
+    }
+    
+    // Parse the command content (non-pipe command)
     if (parse_input(current->content) == 0)
     {
         // Execute the parsed command
@@ -156,7 +165,8 @@ void empty_tree(t_trinary *head)
     empty_tree(head->first_cond);
     empty_tree(head->next);
     
-    if (head->content)
+    // Only free content if it's not the original input line
+    if (head->content && head->content != g_data.input_line)
         free(head->content);
     free(head);
 }
