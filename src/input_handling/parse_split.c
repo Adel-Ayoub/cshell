@@ -22,9 +22,17 @@ int parse_input(char *input)
     if (expand_wildcards() != 0)
         return (-1);
     
-    // Parse redirections
-    if (parse_redirections() != 0)
-        return (-1);
+    // Check if there are redirections in the input before parsing
+    if (dl_strchr(input, '<') || dl_strchr(input, '>'))
+    {
+        // Parse redirections only if they exist
+        if (parse_redirections() != 0)
+            return (-1);
+        
+        // Clean up redirection arguments from args array
+        if (cleanup_redirection_args() != 0)
+            return (-1);
+    }
     
     // Parse logical operators
     if (parse_logical_operators() != 0)
