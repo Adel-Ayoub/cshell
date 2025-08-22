@@ -19,7 +19,7 @@ int wild_card_check(char *pattern)
 
 int expand_wildcards(void)
 {
-    if (!g_data.args_array)
+    if (!g_data.args_array || !g_data.args_array[0])
         return (0);
     
     int i = 0;
@@ -28,18 +28,31 @@ int expand_wildcards(void)
     // First pass: count how many arguments we'll have after expansion
     while (g_data.args_array[i])
     {
-        if (wild_card_check(g_data.args_array[i]))
+        if (g_data.args_array[i] && wild_card_check(g_data.args_array[i]))
         {
-            char **expanded = expand_wildcard_pattern(g_data.args_array[i]);
-            if (expanded)
+            // Don't expand the first argument (command name)
+            if (i == 0)
             {
-                int j = 0;
-                while (expanded[j])
+                expanded_count++;
+            }
+            else
+            {
+                char **expanded = expand_wildcard_pattern(g_data.args_array[i]);
+                if (expanded)
                 {
-                    expanded_count++;
-                    j++;
+                    int j = 0;
+                    while (expanded[j])
+                    {
+                        expanded_count++;
+                        j++;
+                    }
+                    free_string_array(expanded);
                 }
-                free_string_array(expanded);
+                else
+                {
+                    // No matches found, keep original pattern
+                    expanded_count++;
+                }
             }
         }
         else
@@ -63,25 +76,34 @@ int expand_wildcards(void)
     
     while (g_data.args_array[i])
     {
-        if (wild_card_check(g_data.args_array[i]))
+        if (g_data.args_array[i] && wild_card_check(g_data.args_array[i]))
         {
-            char **expanded = expand_wildcard_pattern(g_data.args_array[i]);
-            if (expanded)
+            // Don't expand the first argument (command name)
+            if (i == 0)
             {
-                int j = 0;
-                while (expanded[j])
-                {
-                    new_args[new_index] = dl_strdup(expanded[j]);
-                    new_index++;
-                    j++;
-                }
-                free_string_array(expanded);
+                new_args[new_index] = dl_strdup(g_data.args_array[i]);
+                new_index++;
             }
             else
             {
-                // No matches found, keep original pattern
-                new_args[new_index] = dl_strdup(g_data.args_array[i]);
-                new_index++;
+                char **expanded = expand_wildcard_pattern(g_data.args_array[i]);
+                if (expanded)
+                {
+                    int j = 0;
+                    while (expanded[j])
+                    {
+                        new_args[new_index] = dl_strdup(expanded[j]);
+                        new_index++;
+                        j++;
+                    }
+                    free_string_array(expanded);
+                }
+                else
+                {
+                    // No matches found, keep original pattern
+                    new_args[new_index] = dl_strdup(g_data.args_array[i]);
+                    new_index++;
+                }
             }
         }
         else
@@ -112,17 +134,42 @@ char **expand_wildcard_pattern(const char *pattern)
     char **matches = NULL;
     int match_count = 0;
     int max_matches = 100; // Reasonable limit
+    char *dir_path = ".";
+    char *file_pattern = (char *)pattern;
+    int allocated_dir = 0;
+    
+    // Check if pattern contains a directory path
+    char *last_slash = dl_strrchr(pattern, '/');
+    if (last_slash)
+    {
+        // Extract directory path and file pattern
+        int dir_len = last_slash - pattern;
+        dir_path = dl_calloc(dir_len + 1, sizeof(char));
+        if (!dir_path)
+            return (NULL);
+        dl_strncpy(dir_path, pattern, dir_len);
+        dir_path[dir_len] = '\0';
+        allocated_dir = 1;
+        
+        file_pattern = (char *)(last_slash + 1);
+    }
     
     // Allocate initial matches array
     matches = dl_calloc(max_matches + 1, sizeof(char *));
     if (!matches)
+    {
+        if (allocated_dir)
+            free(dir_path);
         return (NULL);
+    }
     
-    // Open current directory
-    dir = opendir(".");
+    // Open the specified directory
+    dir = opendir(dir_path);
     if (!dir)
     {
         free(matches);
+        if (allocated_dir)
+            free(dir_path);
         return (NULL);
     }
     
@@ -134,15 +181,34 @@ char **expand_wildcard_pattern(const char *pattern)
             continue;
         
         // Check if filename matches pattern
-        if (match_pattern(entry->d_name, pattern))
+        if (match_pattern(entry->d_name, file_pattern))
         {
-            matches[match_count] = dl_strdup(entry->d_name);
-            if (matches[match_count])
-                match_count++;
+            // If we're in a subdirectory, include the full path
+            if (allocated_dir)
+            {
+                char *full_path = dl_strjoin(dl_strjoin(dir_path, "/"), entry->d_name);
+                if (full_path)
+                {
+                    matches[match_count] = full_path;
+                    match_count++;
+                }
+            }
+            else
+            {
+                matches[match_count] = dl_strdup(entry->d_name);
+                if (matches[match_count])
+                    match_count++;
+            }
         }
+        
+
     }
     
     closedir(dir);
+    
+    // Clean up directory path
+    if (allocated_dir)
+        free(dir_path);
     
     // If no matches found, return NULL
     if (match_count == 0)
@@ -218,6 +284,8 @@ int match_glob_pattern(const char *filename, const char *pattern)
     int prefix_len = star_pos - pattern;
     int suffix_len = dl_strlen(star_pos + 1);
     
+
+    
     // Check prefix
     if (prefix_len > 0 && dl_strncmp(filename, pattern, prefix_len) != 0)
         return (0);
@@ -228,6 +296,8 @@ int match_glob_pattern(const char *filename, const char *pattern)
         int filename_len = dl_strlen(filename);
         if (filename_len < prefix_len + suffix_len)
             return (0);
+        
+
         
         if (dl_strncmp(filename + filename_len - suffix_len, star_pos + 1, suffix_len) != 0)
             return (0);
