@@ -35,7 +35,6 @@ make
 
 - C compiler (GCC/Clang)
 - Make
-- Readline library (automatically managed by Makefile)
 
 ---
 
