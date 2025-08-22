@@ -1,6 +1,6 @@
 # CShell
 
-## A comprehensive Unix shell implementation in C with advanced features and trinary tree architecture.
+## A Unix shell implementation in C with advanced features and trinary tree architecture.
 
 Currently the shell offers:
 
@@ -131,7 +131,6 @@ cp file?.txt backup/
 | `make clean` | Remove build artifacts |
 | `make fclean` | Remove all artifacts and libraries |
 | `make re` | Clean build from scratch |
-
 
 ---
 
