@@ -252,6 +252,7 @@ int cleanup_redirection_args(void);
 int setup_redirections(void);
 int open_redirection_files(void);
 int handle_here_documents(void);
+int handle_single_heredoc(t_redi *current);
 int apply_redirections(void);
 void restore_redirections(void);
 void cleanup_redirections(void);
