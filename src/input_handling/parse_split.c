@@ -22,6 +22,13 @@ int parse_input(char *input)
     if (expand_wildcards() != 0)
         return (-1);
     
+    // Check if there are pipes in the input
+    if (dl_strchr(input, '|'))
+    {
+        // Handle pipe command (avoid recursion by calling directly)
+        return (handle_pipe_direct(input));
+    }
+    
     // Check if there are redirections in the input before parsing
     if (dl_strchr(input, '<') || dl_strchr(input, '>'))
     {
