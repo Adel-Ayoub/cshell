@@ -7,7 +7,7 @@ Currently the shell offers:
 - Interactive and non-interactive modes with robust signal handling
 - 11 built-in commands with advanced features and environment management
 - Complete redirection system with input/output and here-documents
-- Multi-stage pipe system with process management
+- Complete pipe system with multi-command pipelines and proper process management
 - Command chaining with semicolon-separated commands
 - Wildcard expansion with pattern matching
 - Environment variable expansion with default value support
@@ -48,7 +48,7 @@ make
 | External Commands | [COMPLETE] | Execute system binaries |
 | Environment Management | [COMPLETE] | Variable expansion and management |
 | Redirections | [COMPLETE] | Input/output and here-documents |
-| Pipes | [IN PROGRESS] | Multi-stage command pipelines |
+| Pipes | [COMPLETE] | Multi-stage command pipelines |
 | Command Chaining | [COMPLETE] | Semicolon-separated commands |
 | Wildcard Expansion | [COMPLETE] | Pattern matching for files |
 | Signal Handling | [COMPLETE] | SIGINT, SIGQUIT management |
@@ -106,8 +106,9 @@ input
 EOF
 
 # Pipes
-echo "hello world" | grep "hello"
-ls -la | head -5
+echo "hello world" | wc -w
+echo "hello" | cat
+ls -la | head -5 | wc -l
 
 # Command chaining
 pwd; echo hello; pwd
@@ -135,7 +136,6 @@ cp file?.txt backup/
 
 ## Future Improvements
 
-- [ ] Complete pipe system debugging and output production
 - [ ] Job control and background process management
 - [ ] Logical operators (AND &&, OR ||) for command chaining
 - [ ] Priority-based command execution
@@ -145,13 +145,6 @@ cp file?.txt backup/
 - [ ] Memory usage profiling and optimization
 
 ---
-
-## Known Issues
-
-- **Pipe Output**: Pipes are structurally complete but need debugging for proper output production
-- **Status**: Being actively worked on in current development phase
-
-
 
 ## License
 
