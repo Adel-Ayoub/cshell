@@ -154,6 +154,8 @@ typedef struct s_data {
     // Redirections
     t_redi *redirections;
     int redir_count;
+    int original_stdin;
+    int original_stdout;
     
     // Pipes
     int **pipes;
@@ -245,9 +247,13 @@ void exec_node(t_trinary *current);
 void empty_tree(t_trinary *head);
 
 // Redirections
+int parse_redirections(void);
+int cleanup_redirection_args(void);
 int setup_redirections(void);
 int open_redirection_files(void);
 int handle_here_documents(void);
+int apply_redirections(void);
+void restore_redirections(void);
 void cleanup_redirections(void);
 
 // Commands
