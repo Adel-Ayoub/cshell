@@ -162,6 +162,8 @@ typedef struct s_data {
     int pipe_count;
     pid_t *child_pids;
     int child_count;
+    int cmd_amount;
+    int pipe_amount;
     
     // Parsing state
     t_split split_state;
@@ -264,6 +266,18 @@ int execute_external(char **args);
 int find_executable(char *command);
 int setup_pipes(void);
 void cleanup_pipes(void);
+
+// Pipes
+int handle_pipe(char *cmd_str);
+int handle_pipe_direct(char *cmd_str);
+int init_pipes(void);
+void go_through_pipeline(void);
+void the_piper(int cmd_index);
+void the_kindergarden(int cmd_index);
+void close_pipeline(void);
+void free_commands(void);
+char **parse_pipe_commands(char *cmd_str);
+t_redi *find_redirection_node(int type);
 
 // Cross-module helpers
 int work_built(char **args);
