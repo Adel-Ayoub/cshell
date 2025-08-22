@@ -29,6 +29,10 @@ int setup_shell(char **env)
     // Initialize trinary tree
     g_data.trinary_tree = NULL;
     
+    // Initialize redirection fields
+    g_data.original_stdin = -1;
+    g_data.original_stdout = -1;
+    
     return (0);
 }
 
@@ -277,32 +281,8 @@ int parse_logical_operators(void)
     if (dl_strchr(g_data.input_line, ';') == NULL)
         return (0);
     
-    // Split on semicolons
-    char **commands = dl_split(g_data.input_line, ';');
-    if (!commands)
-        return (0);
-    
-    // Process each command
-    for (int i = 0; commands[i]; i++)
-    {
-        // Trim whitespace from command
-        char *trimmed = trim_whitespace(commands[i]);
-        if (trimmed && *trimmed)
-        {
-            // Process this command
-            if (process_single_command(trimmed) != 0)
-            {
-                // Error processing command, but continue with others
-                print_error("parse", "error processing command");
-            }
-        }
-        if (trimmed)
-            free(trimmed);
-    }
-    
-    // Clean up
-    free_string_array(commands);
-    
+    // For now, just return success - semicolon handling is done in trinary tree
+    // This prevents infinite recursion
     return (0);
 }
 
