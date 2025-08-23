@@ -113,6 +113,16 @@ ls -la | head -5 | wc -l
 # Command chaining
 pwd; echo hello; pwd
 
+# Logical operators
+echo "First" && echo "Second"
+false || echo "This will run"
+echo "Test" && echo "Success" || echo "Failure"
+
+# Background jobs
+sleep 30 &
+sleep 25 & sleep 20 &
+jobs
+
 # Wildcard expansion
 ls *.txt
 cp file?.txt backup/
@@ -136,8 +146,8 @@ cp file?.txt backup/
 
 ## Future Improvements
 
-- [ ] Job control and background process management
-- [ ] Logical operators (AND &&, OR ||) for command chaining
+- [x] Job control and background process management
+- [x] Logical operators (AND &&, OR ||) for command chaining
 - [ ] Priority-based command execution
 - [ ] Advanced signal handling and process management
 - [ ] Comprehensive testing suite and validation
