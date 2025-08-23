@@ -1,5 +1,7 @@
 #include "cshell.h"
 
+
+
 // Create a condition node (command node)
 t_trinary *create_condition_node(char *str, t_trinary *up)
 {
@@ -317,9 +319,11 @@ void traveler(t_trinary *current)
         // The return value should be 0 (success) for the shell
         current->ret = 0;
         
-        // Add to background jobs list (if job control is implemented)
-        // For now, we'll just note that this was a background job
-        // TODO: Implement proper background job management
+        // Execute the background command immediately
+        if (current->first_cond)
+        {
+            exec_node(current->first_cond);
+        }
         
         // Ensure the return value is propagated to parent nodes
         if (current->up)
