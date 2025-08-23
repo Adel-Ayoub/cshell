@@ -36,6 +36,7 @@ INPUT_SRC = $(SRCDIR)/input_handling/error_checks.c \
             $(SRCDIR)/input_handling/expand_envs.c \
             $(SRCDIR)/input_handling/dl_ls.c \
             $(SRCDIR)/input_handling/lex_checks.c \
+            $(SRCDIR)/input_handling/logical_operators.c \
             $(SRCDIR)/input_handling/parse_split.c \
             $(SRCDIR)/input_handling/split_utils.c \
             $(SRCDIR)/input_handling/wild_cards.c \
