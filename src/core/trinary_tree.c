@@ -109,6 +109,9 @@ t_trinary *create_level(char *str, t_trinary *back, t_trinary *up, int var)
         // Set pointers to NULL to prevent double-free
         left = NULL;
         right = NULL;
+        
+
+        
         return (new);
     }
     
@@ -279,6 +282,10 @@ void traveler(t_trinary *current)
         // Add to background jobs list (if job control is implemented)
         // For now, we'll just note that this was a background job
         // TODO: Implement proper background job management
+        
+        // Ensure the return value is propagated to parent nodes
+        if (current->up)
+            current->up->ret = current->ret;
     }
     
     // Traverse next node (semicolon chain)

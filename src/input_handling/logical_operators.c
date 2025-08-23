@@ -12,8 +12,8 @@ int has_logical_operators(const char *str)
             return (1);
         if (str[i] == '|' && str[i + 1] == '|')
             return (1);
-        if (str[i] == '&' && str[i + 1] != '&')
-            return (1);  // Single & for background jobs
+        if (str[i] == '&' && str[i + 1] != '&' && str[i + 1] != '\0')
+            return (1);  // Single & for background jobs (but not at end of string)
     }
     return (0);
 }
@@ -26,6 +26,7 @@ int find_logical_operator(const char *str, int *operator_type)
     
     for (int i = 0; str[i]; i++)
     {
+        // Check for double operators first (&&, ||)
         if (str[i] == '&' && str[i + 1] == '&')
         {
             *operator_type = 1; // AND operator
@@ -36,7 +37,8 @@ int find_logical_operator(const char *str, int *operator_type)
             *operator_type = 2; // OR operator
             return (i);
         }
-        if (str[i] == '&' && str[i + 1] != '&')
+        // Check for single & only if it's not part of && and not followed by &
+        if (str[i] == '&' && str[i + 1] != '&' && str[i + 1] != '\0' && str[i - 1] != '&')
         {
             *operator_type = 3; // Background operator
             return (i);
