@@ -115,11 +115,11 @@ t_trinary *create_level(char *str, t_trinary *back, t_trinary *up, int var)
         return (new);
     }
     
-    // If no logical operators, check for semicolons
+    // If no logical operators, check for semicolons and background operators
     int i = 0;
     while (str[i])
     {
-        if (str[i] == ';')
+        if (str[i] == ';' || (str[i] == '&' && (i == 0 || str[i - 1] != '&')))
             break;
         i++;
     }
@@ -141,6 +141,35 @@ t_trinary *create_level(char *str, t_trinary *back, t_trinary *up, int var)
         }
         
         // Create next node for remaining commands (after semicolon)
+        char *remaining = dl_strdup(str + i + 1);
+        if (remaining)
+        {
+            new->next = create_level(remaining, new, up, 0);
+            // Note: remaining memory is now owned by the next node, don't free it here
+        }
+        
+        return (new);
+    }
+    else if (str[i] == '&' && (i == 0 || str[i - 1] != '&'))
+    {
+        // Handle background operator as command separator
+        // Create command node for first part (before &)
+        char *first_cmd = dl_calloc(i + 1, sizeof(char));
+        if (!first_cmd)
+            return (NULL);
+        dl_strncpy(first_cmd, str, i);
+        first_cmd[i] = '\0';
+        
+        // Create background node
+        new = create_condition_node(first_cmd, up);
+        if (!new)
+        {
+            free(first_cmd);
+            return (NULL);
+        }
+        new->type = 3; // BACKGROUND type
+        
+        // Create next node for remaining commands (after &)
         char *remaining = dl_strdup(str + i + 1);
         if (remaining)
         {
