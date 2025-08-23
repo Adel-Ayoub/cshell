@@ -4,6 +4,7 @@ void setup_signals(void)
 {
     struct sigaction sa_int;
     struct sigaction sa_quit;
+    struct sigaction sa_tstp;
     
     // Setup SIGINT handler
     dl_memset(&sa_int, 0, sizeof(sa_int));
@@ -16,6 +17,12 @@ void setup_signals(void)
     sa_quit.sa_handler = handle_sigquit;
     sa_quit.sa_flags = SA_RESTART;
     sigaction(SIGQUIT, &sa_quit, NULL);
+    
+    // Setup SIGTSTP handler for job control
+    dl_memset(&sa_tstp, 0, sizeof(sa_tstp));
+    sa_tstp.sa_handler = handle_sigtstp;
+    sa_tstp.sa_flags = SA_RESTART;
+    sigaction(SIGTSTP, &sa_tstp, NULL);
 }
 
 void handle_sigint(int sig)
@@ -55,6 +62,23 @@ void handle_sigquit(int sig)
     {
         // In non-interactive mode, set exit flag
         g_data.exit_status = 131; // 128 + SIGQUIT
+    }
+}
+
+void handle_sigtstp(int sig)
+{
+    (void)sig;
+    
+    if (g_data.interactive_mode)
+    {
+        // Print newline and show the signal
+        dl_putchar_fd('\n', STDOUT_FILENO);
+        dl_putstr_fd("^Z", STDOUT_FILENO);
+        dl_putchar_fd('\n', STDOUT_FILENO);
+        
+        // For now, we'll just show the signal
+        // In a full implementation, this would stop the current foreground job
+        // and add it to the background jobs list as stopped
     }
 }
 

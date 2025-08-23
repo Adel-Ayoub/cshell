@@ -207,6 +207,7 @@ char *get_prompt(void);
 void setup_signals(void);
 void handle_sigint(int sig);
 void handle_sigquit(int sig);
+void handle_sigtstp(int sig);
 void handle_child_signals(void);
 void block_signals(void);
 void unblock_signals(void);
@@ -311,6 +312,8 @@ int builtin_jobs(char **args);
 int add_background_job(pid_t pid, char *command);
 int remove_background_job(pid_t pid);
 void update_job_status(pid_t pid, int status);
+int builtin_fg(char **args);
+int builtin_bg(char **args);
 char *find_command_path(char *command);
 
 // Builtin helpers
