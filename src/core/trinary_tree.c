@@ -191,12 +191,21 @@ void exec_node(t_trinary *current)
         {
             // Parent process - add to background jobs and continue
             current->ret = 0;  // Background job started successfully
-            // TODO: Add to job control list
-            dl_putstr_fd("[1] ", 1);
-            char *pid_str = dl_itoa(pid);
-            dl_putstr_fd(pid_str, 1);
-            free(pid_str);
-            dl_putstr_fd("\n", 1);
+            
+            // Add to background jobs list
+            int job_id = add_background_job(pid, current->content);
+            if (job_id >= 0)
+            {
+                dl_putstr_fd("[", 1);
+                char *job_str = dl_itoa(job_id + 1);
+                dl_putstr_fd(job_str, 1);
+                free(job_str);
+                dl_putstr_fd("] ", 1);
+                char *pid_str = dl_itoa(pid);
+                dl_putstr_fd(pid_str, 1);
+                free(pid_str);
+                dl_putstr_fd("\n", 1);
+            }
         }
         else
         {
