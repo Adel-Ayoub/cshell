@@ -246,6 +246,9 @@ int find_logical_operator(const char *str, int *operator_type);
 int parse_logical_expression(const char *str, char **left, char **right, int *operator_type);
 void cleanup_logical_expression(char **left, char **right);
 
+// Complex expression parsing with operator precedence
+int parse_complex_expression(const char *str, char **left, char **right, int *operator_type);
+
 // Trinary tree functions
 t_trinary *create_level(char *str, t_trinary *back, t_trinary *up, int var);
 t_trinary *create_condition_node(char *str, t_trinary *up);

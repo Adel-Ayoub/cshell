@@ -59,7 +59,7 @@ t_trinary *create_level(char *str, t_trinary *back, t_trinary *up, int var)
         return (create_condition_node(str, up));
     
     // Check for logical operators first (they have higher precedence than semicolons)
-    if (has_logical_operators(str) && parse_logical_expression(str, &left, &right, &operator_type))
+    if (has_logical_operators(str) && parse_complex_expression(str, &left, &right, &operator_type))
     {
         // Create operator node
         new = dl_calloc(1, sizeof(t_trinary));
