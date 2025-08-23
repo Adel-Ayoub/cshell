@@ -124,7 +124,7 @@ typedef struct s_cond {
 // Trinary tree node for command chaining
 typedef struct s_trinary
 {
-    int             type;           // 0=command, 1=AND, 2=OR
+    int             type;           // 0=command, 1=AND, 2=OR, 3=BACKGROUND
     int             ret;            // Return value
     int             hd_n;          // Here-doc number
     char            *content;       // Command string
@@ -239,6 +239,12 @@ int parse_redirections(void);
 int parse_logical_operators(void);
 int process_single_command(char *command);
 char *trim_whitespace(char *str);
+
+// Logical operator parsing
+int has_logical_operators(const char *str);
+int find_logical_operator(const char *str, int *operator_type);
+int parse_logical_expression(const char *str, char **left, char **right, int *operator_type);
+void cleanup_logical_expression(char **left, char **right);
 
 // Trinary tree functions
 t_trinary *create_level(char *str, t_trinary *back, t_trinary *up, int var);
