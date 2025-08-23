@@ -49,7 +49,8 @@ t_trinary *create_tokenode(t_error help, char *str, t_trinary *back, t_trinary *
 t_trinary *create_level(char *str, t_trinary *back, t_trinary *up, int var)
 {
     t_trinary *new;
-    int i;
+    int operator_type;
+    char *left, *right;
     
     (void)back;  // Suppress unused parameter warning
     (void)var;   // Suppress unused parameter warning
@@ -57,8 +58,62 @@ t_trinary *create_level(char *str, t_trinary *back, t_trinary *up, int var)
     if (!str || !*str)
         return (create_condition_node(str, up));
     
-    // Find the first semicolon (command separator)
-    i = 0;
+    // Check for logical operators first (they have higher precedence than semicolons)
+    if (has_logical_operators(str) && parse_logical_expression(str, &left, &right, &operator_type))
+    {
+        // Create operator node
+        new = dl_calloc(1, sizeof(t_trinary));
+        if (!new)
+        {
+            cleanup_logical_expression(&left, &right);
+            return (NULL);
+        }
+        
+        new->type = operator_type;  // 1 for AND, 2 for OR
+        new->ret = -1;
+        new->content = NULL;  // Operator nodes don't have content
+        new->up = up;
+        new->back = back;
+        new->next = NULL;
+        
+        // Create left child (first condition)
+        new->first_cond = create_level(left, NULL, new, 0);
+        if (!new->first_cond)
+        {
+            // Free the strings since they weren't assigned
+            if (left) free(left);
+            if (right) free(right);
+            free(new);
+            return (NULL);
+        }
+        
+        // Create right child (second condition) - only for && and ||
+        if (right)
+        {
+            new->sec_cond = create_level(right, new, up, 0);
+            if (!new->sec_cond)
+            {
+                // Note: left is now owned by first_cond, don't free it here
+                // Only free right since it failed to be assigned
+                free(right);
+                free(new);
+                return (NULL);
+            }
+        }
+        else
+        {
+            new->sec_cond = NULL;  // Background jobs don't have a second condition
+        }
+        
+        // Don't clean up the strings - they are now owned by the tree nodes
+        // Set pointers to NULL to prevent double-free
+        left = NULL;
+        right = NULL;
+        return (new);
+    }
+    
+    // If no logical operators, check for semicolons
+    int i = 0;
     while (str[i])
     {
         if (str[i] == ';')
@@ -105,7 +160,50 @@ void exec_node(t_trinary *current)
     if (!current || !current->content)
         return;
     
-    // Check if the command contains pipes
+    // Check if this is a background job (parent node is background type)
+    int is_background = (current->up && current->up->type == 3);
+    
+    if (is_background)
+    {
+        // Execute command in background using fork
+        pid_t pid = fork();
+        if (pid == 0)
+        {
+            // Child process - execute the command
+            if (dl_strchr(current->content, '|'))
+            {
+                // Handle pipe command directly
+                exit(handle_pipe_direct(current->content));
+            }
+            else
+            {
+                // Parse and execute non-pipe command
+                if (parse_input(current->content) == 0)
+                    exit(execute_commands());
+                else
+                    exit(EXIT_FAILURE);
+            }
+        }
+        else if (pid > 0)
+        {
+            // Parent process - add to background jobs and continue
+            current->ret = 0;  // Background job started successfully
+            // TODO: Add to job control list
+            dl_putstr_fd("[1] ", 1);
+            char *pid_str = dl_itoa(pid);
+            dl_putstr_fd(pid_str, 1);
+            free(pid_str);
+            dl_putstr_fd("\n", 1);
+        }
+        else
+        {
+            // Fork failed
+            current->ret = EXIT_FAILURE;
+        }
+        return;
+    }
+    
+    // Regular foreground execution
     if (dl_strchr(current->content, '|'))
     {
         // Handle pipe command directly
@@ -131,15 +229,64 @@ void traveler(t_trinary *current)
     if (!current)
         return;
     
+    // Execute first condition if this is a logical operator node
+    if (current->first_cond)
+    {
+        traveler(current->first_cond);
+        // Propagate the return value from first condition
+        current->ret = current->first_cond->ret;
+    }
+    
     // Execute current node if it's a command
     if (current->type == 0)
     {
         exec_node(current);
     }
     
+    // Execute second condition based on logical operator with short-circuit evaluation
+    if (current->type == 1)  // AND operator (&&)
+    {
+        if (current->ret == 0)  // First condition succeeded, execute second
+        {
+            if (current->sec_cond)
+            {
+                traveler(current->sec_cond);
+                // Update current node's return value with second condition's result
+                current->ret = current->sec_cond->ret;
+            }
+        }
+        // If first condition failed, don't execute second (short-circuit)
+    }
+    else if (current->type == 2)  // OR operator (||)
+    {
+        if (current->ret != 0)  // First condition failed, execute second
+        {
+            if (current->sec_cond)
+            {
+                traveler(current->sec_cond);
+                // Update current node's return value with second condition's result
+                current->ret = current->sec_cond->ret;
+            }
+        }
+        // If first condition succeeded, don't execute second (short-circuit)
+    }
+    else if (current->type == 3)  // Background operator (&)
+    {
+        // For background jobs, we execute the command in the background
+        // The return value should be 0 (success) for the shell
+        current->ret = 0;
+        
+        // Add to background jobs list (if job control is implemented)
+        // For now, we'll just note that this was a background job
+        // TODO: Implement proper background job management
+    }
+    
     // Traverse next node (semicolon chain)
     if (current->next)
     {
+        // Pass the return value to the next node
+        if (current->next)
+            current->next->ret = current->ret;
         traveler(current->next);
     }
 }
