@@ -20,9 +20,7 @@ int main(int argc, char **argv, char **env)
     // Main shell loop
     shell_loop();
     
-    
     // Cleanup and exit
     cleanup_shell();
-    
     return (g_data.exit_status);
 }
