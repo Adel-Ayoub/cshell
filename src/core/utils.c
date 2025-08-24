@@ -236,8 +236,6 @@ void cleanup_all(void)
     // Free pipes
     if (g_data.pipes)
     {
-        for (int i = 0; i < g_data.pipe_count; i++)
-            free(g_data.pipes[i]);
         free(g_data.pipes);
     }
     
