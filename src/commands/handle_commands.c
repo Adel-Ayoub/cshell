@@ -7,7 +7,7 @@ int execute_commands(void)
     if (!g_data.args_array || !g_data.args_array[0])
         return (EXIT_SUCCESS);
     
-    // Process wildcards before execution (following minishell pattern)
+    // Process wildcards before execution
     if (expand_wildcards() != 0)
         return (EXIT_FAILURE);
     
