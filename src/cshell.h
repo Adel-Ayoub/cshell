@@ -158,7 +158,7 @@ typedef struct s_data {
     int original_stdout;
     
     // Pipes
-    int **pipes;
+    int *pipes;           // Array of pipe file descriptors
     int pipe_count;
     pid_t *child_pids;
     int child_count;

@@ -16,8 +16,8 @@ int init_pipes(void)
     if (!g_data.child_pids)
         return (-1);
     
-    // Allocate pipe array
-    g_data.pipes = (int **)dl_calloc(g_data.cmd_amount - 1, sizeof(int *));
+    // Allocate flat pipe array
+    g_data.pipes = (int *)dl_calloc(g_data.pipe_amount, sizeof(int));
     if (!g_data.pipes)
     {
         free(g_data.child_pids);
@@ -25,17 +25,10 @@ int init_pipes(void)
         return (-1);
     }
     
-    // Create pipes
+    // Create pipes (pipe[2*i] and pipe[2*i+1])
     for (i = 0; i < g_data.cmd_amount - 1; i++)
     {
-        g_data.pipes[i] = (int *)dl_calloc(2, sizeof(int));
-        if (!g_data.pipes[i])
-        {
-            close_pipeline();
-            return (-1);
-        }
-        
-        if (pipe(g_data.pipes[i]) < 0)
+        if (pipe(&g_data.pipes[2 * i]) < 0)
         {
             close_pipeline();
             return (-1);
@@ -53,14 +46,10 @@ void close_pipeline(void)
     if (!g_data.pipes)
         return;
     
-    for (i = 0; i < g_data.cmd_amount - 1; i++)
+    // Close all pipe file descriptors
+    for (i = 0; i < g_data.pipe_amount; i++)
     {
-        if (g_data.pipes[i])
-        {
-            close(g_data.pipes[i][0]);
-            close(g_data.pipes[i][1]);
-            free(g_data.pipes[i]);
-        }
+        close(g_data.pipes[i]);
     }
     
     free(g_data.pipes);
