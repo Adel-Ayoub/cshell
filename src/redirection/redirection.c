@@ -202,24 +202,27 @@ int handle_single_heredoc(t_redi *current)
 {
     static int heredoc_counter = 0;
     char *number;
-    char *filename;
     int fd;
     
-    // Create unique filename like minishell
+    // Create unique filename
+    char *filename = dl_strdup("/tmp/cshell_heredoc_");
+    if (!filename)
+        return (-1);
+    
     number = dl_itoa(heredoc_counter++);
     if (!number)
     {
-        print_error("here-document", "memory allocation failed");
+        free(filename);
         return (-1);
     }
     
-    filename = dl_strjoin(".cshell_heredoc_tmp", number);
+    char *temp_filename = dl_strjoin(filename, number);
+    free(filename);
     free(number);
-    if (!filename)
-    {
-        print_error("here-document", "memory allocation failed");
+    if (!temp_filename)
         return (-1);
-    }
+    
+    filename = temp_filename;
     
     // Create temp file
     fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
