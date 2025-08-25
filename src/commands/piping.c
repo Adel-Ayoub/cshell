@@ -109,9 +109,6 @@ void the_piper(int cmd_index)
 // Execute a single command in the pipeline
 void the_kindergarden(int cmd_index, char *cmd_str)
 {
-    char **args;
-    int ret;
-    
     // Set up file descriptors for this command
     the_piper(cmd_index);
     
@@ -132,31 +129,14 @@ void the_kindergarden(int cmd_index, char *cmd_str)
         exit(1);
     }
     
-    // Parse the individual command
-    args = parse_single_command(cmd_str);
-    if (!args || !args[0])
+    // Parse the command to handle wildcards and redirections
+    if (parse_input(cmd_str) != 0)
     {
-        free_string_array(args);
         exit(1);
     }
     
-    // Check if it's a builtin
-    if (is_builtin(args[0]))
-    {
-        ret = execute_builtin(args);
-        free_string_array(args);
-        exit(ret);
-    }
-    else
-    {
-        // Execute external command
-        if (execvp(args[0], args) == -1)
-        {
-            print_error(args[0], "execution failed");
-            free_string_array(args);
-            exit(127);
-        }
-    }
+    // Execute the command (this will handle wildcard expansion)
+    exit(execute_commands());
 }
 
 // Parse and prepare a single command for execution
@@ -197,15 +177,12 @@ void go_through_pipeline(char **commands)
 {
     int i;
     
+    if (!commands)
+        return;
+    
+    // Fork all child processes first
     for (i = 0; i < g_data.cmd_amount; i++)
     {
-        // Prepare the command (parse arguments, check if it exists)
-        if (prepare_command(i, commands[i]) != 0)
-        {
-            // Command preparation failed, skip this command
-            continue;
-        }
-        
         // Fork child process for this command
         g_data.child_pids[i] = fork();
         
