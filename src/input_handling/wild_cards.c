@@ -353,6 +353,12 @@ int match_pattern(const char *filename, const char *pattern)
     int has_question = (dl_strchr(pattern, '?') != NULL);
     int has_bracket = (dl_strchr(pattern, '[') != NULL);
     
+    // Special case: if we have brackets but no other complex wildcards, use bracket matcher
+    if (has_bracket && !has_star && !has_question)
+    {
+        return match_bracket_pattern(filename, pattern);
+    }
+    
     // If we have multiple wildcard types, we need more sophisticated matching
     if ((has_star && has_bracket) || (has_star && has_question) || (has_bracket && has_question))
     {
@@ -369,12 +375,6 @@ int match_pattern(const char *filename, const char *pattern)
     if (has_question)
     {
         return match_question_pattern(filename, pattern);
-    }
-    
-    // Handle [set] pattern (character set)
-    if (has_bracket)
-    {
-        return match_bracket_pattern(filename, pattern);
     }
     
     // No wildcards, exact match
@@ -531,6 +531,26 @@ int match_bracket_pattern(const char *filename, const char *pattern)
             pattern_pos++;
             filename_pos++;
         }
+        else if (pattern[pattern_pos] == '*')
+        {
+            // * matches any sequence of characters
+            // For bracket patterns with *, we need to handle this specially
+            if (pattern_pos + 1 >= pattern_len)
+            {
+                // * at the end, match everything
+                return (1);
+            }
+            else
+            {
+                // Try to match the remaining pattern after *
+                for (int i = 0; filename_pos + i <= filename_len; i++)
+                {
+                    if (match_bracket_pattern(filename + filename_pos + i, pattern + pattern_pos + 1))
+                        return (1);
+                }
+                return (0);
+            }
+        }
         else if (pattern[pattern_pos] == filename[filename_pos])
         {
             // Exact character match
@@ -561,6 +581,7 @@ int match_mixed_pattern(const char *filename, const char *pattern)
         return (0);
     
     int result = match_mixed_pattern_recursive(filename, expanded_pattern, 0, 0);
+    
     free(expanded_pattern);
     
     return result;
