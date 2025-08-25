@@ -228,7 +228,10 @@ int match_pattern(const char *filename, const char *pattern);
 int match_glob_pattern(const char *filename, const char *pattern);
 int match_question_pattern(const char *filename, const char *pattern);
 int match_bracket_pattern(const char *filename, const char *pattern);
+int match_mixed_pattern(const char *filename, const char *pattern);
+int match_mixed_pattern_recursive(const char *filename, const char *pattern, int filename_pos, int pattern_pos);
 char **expand_wildcard_pattern(const char *pattern);
+char *expand_range_pattern(const char *pattern);
 void sort_string_array(char **array, int count);
 int validate_syntax(void);
 
