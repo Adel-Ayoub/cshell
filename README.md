@@ -1,6 +1,6 @@
 # CShell
 
-## A Unix shell implementation in C with advanced features and trinary tree architecture.
+## A Unix shell implementation in C.
 
 ## Installation
 
