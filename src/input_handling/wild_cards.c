@@ -130,6 +130,12 @@ char **expand_wildcard_pattern(const char *pattern)
     if (!pattern || !wild_card_check((char *)pattern))
         return (NULL);
     
+
+    
+    // Check if pattern contains multiple directory levels (recursive pattern)
+    if (is_recursive_pattern(pattern))
+        return expand_recursive_pattern(pattern);
+    
     // Expand range patterns first (e.g., [a-c] -> [abc])
     char *expanded_pattern = expand_range_pattern(pattern);
     if (!expanded_pattern)
@@ -258,6 +264,220 @@ char **expand_wildcard_pattern(const char *pattern)
     sort_string_array(matches, match_count);
     
     return (matches);
+}
+
+// Check if pattern contains directory levels with wildcards (recursive pattern)
+int is_recursive_pattern(const char *pattern)
+{
+    if (!pattern)
+        return (0);
+    
+    // Look for pattern like "dir/*/file" or "dir/*/*.c"
+    // This means there's a wildcard between slashes
+    char *slash_pos = dl_strchr(pattern, '/');
+    if (!slash_pos)
+        return (0);
+    
+    // Look for another slash after the first one
+    char *second_slash = dl_strchr(slash_pos + 1, '/');
+    if (!second_slash)
+        return (0);
+    
+    // Check if there are wildcards between slashes
+    char *wildcard_between = NULL;
+    for (char *p = slash_pos + 1; p < second_slash; p++)
+    {
+        if (*p == '*' || *p == '?' || *p == '[')
+        {
+            wildcard_between = p;
+            break;
+        }
+    }
+    
+    return (wildcard_between != NULL);
+}
+
+// Expand recursive directory patterns like src/*/*.c
+char **expand_recursive_pattern(const char *pattern)
+{
+    if (!pattern)
+        return (NULL);
+    
+    // Expand range patterns first
+    char *expanded_pattern = expand_range_pattern(pattern);
+    if (!expanded_pattern)
+        return (NULL);
+    
+    char **matches = NULL;
+    int match_count = 0;
+    int max_matches = 1000; // Higher limit for recursive patterns
+    
+    // Allocate initial matches array
+    matches = dl_calloc(max_matches + 1, sizeof(char *));
+    if (!matches)
+    {
+        free(expanded_pattern);
+        return (NULL);
+    }
+    
+    // Start recursive search from current directory
+    if (search_recursive_matches(".", expanded_pattern, matches, &match_count, max_matches) == -1)
+    {
+        free(matches);
+        free(expanded_pattern);
+        return (NULL);
+    }
+    
+    free(expanded_pattern);
+    
+    // If no matches found, return NULL
+    if (match_count == 0)
+    {
+        free(matches);
+        return (NULL);
+    }
+    
+    // Sort matches alphabetically
+    sort_string_array(matches, match_count);
+    
+    return (matches);
+}
+
+// Recursively search for matches in directories
+int search_recursive_matches(const char *current_dir, const char *pattern, char **matches, int *match_count, int max_matches)
+{
+    if (*match_count >= max_matches)
+        return (0);
+    
+    DIR *dir = opendir(current_dir);
+    if (!dir)
+        return (0);
+    
+    struct dirent *entry;
+    char subdir_path[PATH_MAX];
+    
+    while ((entry = readdir(dir)) != NULL && *match_count < max_matches)
+    {
+        // Skip . and .. entries
+        if (dl_strcmp(entry->d_name, ".") == 0 || dl_strcmp(entry->d_name, "..") == 0)
+            continue;
+        
+        // Construct full path for current entry
+        int dir_len = dl_strlen(current_dir);
+        int name_len = dl_strlen(entry->d_name);
+        
+        if (dir_len + 1 + name_len >= PATH_MAX)
+            continue;
+        
+        dl_strcpy(subdir_path, current_dir);
+        if (current_dir[dl_strlen(current_dir) - 1] != '/')
+        {
+            subdir_path[dir_len] = '/';
+            subdir_path[dir_len + 1] = '\0';
+            dl_strcpy(subdir_path + dir_len + 1, entry->d_name);
+        }
+        else
+        {
+            dl_strcpy(subdir_path + dir_len, entry->d_name);
+        }
+        
+        struct stat st;
+        if (stat(subdir_path, &st) == 0)
+        {
+            if (S_ISDIR(st.st_mode))
+            {
+                // Recursively search subdirectories
+                search_recursive_matches(subdir_path, pattern, matches, match_count, max_matches);
+            }
+            else if (S_ISREG(st.st_mode))
+            {
+                // Check if this file matches the pattern
+                if (match_recursive_pattern(subdir_path, pattern))
+                {
+                    matches[*match_count] = dl_strdup(subdir_path);
+                    if (matches[*match_count])
+                        (*match_count)++;
+                }
+            }
+        }
+    }
+    
+    closedir(dir);
+    return (0);
+}
+
+// Check if a file path matches a recursive pattern
+int match_recursive_pattern(const char *file_path, const char *pattern)
+{
+    if (!file_path || !pattern)
+        return (0);
+    
+    // Split pattern into directory components
+    char **pattern_parts = split_pattern_path(pattern);
+    if (!pattern_parts)
+        return (0);
+    
+    // Split file path into directory components
+    char **path_parts = split_file_path(file_path);
+    if (!path_parts)
+    {
+        free_string_array(pattern_parts);
+        return (0);
+    }
+    
+    int result = match_path_components(pattern_parts, path_parts);
+    
+    free_string_array(pattern_parts);
+    free_string_array(path_parts);
+    
+    return (result);
+}
+
+// Split pattern into directory components
+char **split_pattern_path(const char *pattern)
+{
+    if (!pattern)
+        return (NULL);
+    
+    return (dl_split(pattern, '/'));
+}
+
+// Split file path into directory components
+char **split_file_path(const char *file_path)
+{
+    if (!file_path)
+        return (NULL);
+    
+    return (dl_split(file_path, '/'));
+}
+
+// Match path components against pattern components
+int match_path_components(char **pattern_parts, char **path_parts)
+{
+    if (!pattern_parts || !path_parts)
+        return (0);
+    
+    int pattern_count = 0;
+    int path_count = 0;
+    
+    // Count components
+    while (pattern_parts[pattern_count])
+        pattern_count++;
+    while (path_parts[path_count])
+        path_count++;
+    
+    // If pattern has more components than path, no match
+    if (pattern_count > path_count)
+        return (0);
+    
+    // Match each pattern component against corresponding path component
+    for (int i = 0; i < pattern_count; i++)
+    {
+        if (!match_pattern(path_parts[i], pattern_parts[i]))
+            return (0);
+    }
+    
+    return (1);
 }
 
 // Expand range patterns like [a-c] to [abc]
