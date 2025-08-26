@@ -233,6 +233,15 @@ int match_mixed_pattern_recursive(const char *filename, const char *pattern, int
 char **expand_wildcard_pattern(const char *pattern);
 char *expand_range_pattern(const char *pattern);
 void sort_string_array(char **array, int count);
+
+// Recursive directory pattern support
+int is_recursive_pattern(const char *pattern);
+char **expand_recursive_pattern(const char *pattern);
+int search_recursive_matches(const char *current_dir, const char *pattern, char **matches, int *match_count, int max_matches);
+int match_recursive_pattern(const char *file_path, const char *pattern);
+char **split_pattern_path(const char *pattern);
+char **split_file_path(const char *file_path);
+int match_path_components(char **pattern_parts, char **path_parts);
 int validate_syntax(void);
 
 // Parsing
