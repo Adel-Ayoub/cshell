@@ -108,6 +108,7 @@ int count_tokens_with_quotes(char *input)
     int i;
     int in_quotes;
     char quote_char;
+    int paren_depth;
     
     if (!input)
         return (0);
@@ -116,6 +117,7 @@ int count_tokens_with_quotes(char *input)
     i = 0;
     in_quotes = 0;
     quote_char = 0;
+    paren_depth = 0;
     
     while (input[i])
     {
@@ -129,8 +131,8 @@ int count_tokens_with_quotes(char *input)
         // Start of token
         count++;
         
-        // Process token
-        while (input[i] && (in_quotes || (input[i] != ' ' && input[i] != '\t' && input[i] != '\n')))
+        // Process token - don't split on spaces inside quotes or $()
+        while (input[i] && (in_quotes || paren_depth > 0 || (input[i] != ' ' && input[i] != '\t' && input[i] != '\n')))
         {
             if (!in_quotes && (input[i] == '"' || input[i] == '\''))
             {
@@ -142,6 +144,24 @@ int count_tokens_with_quotes(char *input)
             {
                 in_quotes = 0;
                 quote_char = 0;
+                i++;
+            }
+            else if (!in_quotes && input[i] == '$' && input[i + 1] == '(')
+            {
+                // Start of command substitution
+                paren_depth++;
+                i += 2;
+            }
+            else if (!in_quotes && paren_depth > 0 && input[i] == '(')
+            {
+                // Nested parenthesis inside $()
+                paren_depth++;
+                i++;
+            }
+            else if (!in_quotes && paren_depth > 0 && input[i] == ')')
+            {
+                // End of command substitution or nested parenthesis
+                paren_depth--;
                 i++;
             }
             else
@@ -161,6 +181,7 @@ int fill_tokens_with_quotes(char *input, char **tokens)
     char quote_char;
     int token_start;
     int was_quoted;
+    int paren_depth;
     
     if (!input || !tokens)
         return (-1);
@@ -169,6 +190,7 @@ int fill_tokens_with_quotes(char *input, char **tokens)
     j = 0;
     in_quotes = 0;
     quote_char = 0;
+    paren_depth = 0;
     
     while (input[i])
     {
@@ -182,9 +204,11 @@ int fill_tokens_with_quotes(char *input, char **tokens)
         // Start of token
         token_start = i;
         was_quoted = 0;
+        paren_depth = 0;
         
         // Process token - first pass to find end and check if quoted
-        while (input[i] && (in_quotes || (input[i] != ' ' && input[i] != '\t' && input[i] != '\n')))
+        // Don't split on spaces inside quotes or $()
+        while (input[i] && (in_quotes || paren_depth > 0 || (input[i] != ' ' && input[i] != '\t' && input[i] != '\n')))
         {
             if (!in_quotes && (input[i] == '"' || input[i] == '\''))
             {
@@ -197,6 +221,24 @@ int fill_tokens_with_quotes(char *input, char **tokens)
             {
                 in_quotes = 0;
                 quote_char = 0;
+                i++;
+            }
+            else if (!in_quotes && input[i] == '$' && input[i + 1] == '(')
+            {
+                // Start of command substitution
+                paren_depth++;
+                i += 2;
+            }
+            else if (!in_quotes && paren_depth > 0 && input[i] == '(')
+            {
+                // Nested parenthesis inside $()
+                paren_depth++;
+                i++;
+            }
+            else if (!in_quotes && paren_depth > 0 && input[i] == ')')
+            {
+                // End of command substitution or nested parenthesis
+                paren_depth--;
                 i++;
             }
             else

@@ -224,6 +224,8 @@ int expand_environment_variables(void);
 int expand_environment_array(char **array);
 char *expand_argument(char *arg);
 char *expand_environment_string(char *str);
+char *expand_command_substitution(char *str);
+char *execute_subshell(const char *command);
 int expand_wildcards(void);
 int wild_card_check(char *pattern);
 int match_pattern(const char *filename, const char *pattern);

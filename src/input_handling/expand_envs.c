@@ -1,13 +1,194 @@
 #include "cshell.h"
 
+// Execute a command and return its output (for command substitution)
+char *execute_subshell(const char *command)
+{
+    int pipe_fds[2];
+    pid_t pid;
+    char *output;
+    char buffer[1024];
+    ssize_t bytes_read;
+    size_t total_size;
+    size_t output_capacity;
+    
+    if (!command || !*command)
+        return (dl_strdup(""));
+    
+    // Create pipe for capturing output
+    if (pipe(pipe_fds) == -1)
+        return (dl_strdup(""));
+    
+    pid = fork();
+    if (pid == -1)
+    {
+        close(pipe_fds[0]);
+        close(pipe_fds[1]);
+        return (dl_strdup(""));
+    }
+    
+    if (pid == 0)
+    {
+        // Child process
+        close(pipe_fds[0]);  // Close read end
+        dup2(pipe_fds[1], STDOUT_FILENO);  // Redirect stdout to pipe
+        close(pipe_fds[1]);
+        
+        // Execute the command using /bin/sh for proper parsing
+        execl("/bin/sh", "sh", "-c", command, NULL);
+        exit(127);  // If execl fails
+    }
+    
+    // Parent process
+    close(pipe_fds[1]);  // Close write end
+    
+    // Read output from pipe
+    output_capacity = 1024;
+    output = dl_calloc(output_capacity, sizeof(char));
+    if (!output)
+    {
+        close(pipe_fds[0]);
+        waitpid(pid, NULL, 0);
+        return (dl_strdup(""));
+    }
+    
+    total_size = 0;
+    while ((bytes_read = read(pipe_fds[0], buffer, sizeof(buffer) - 1)) > 0)
+    {
+        // Resize if needed
+        if (total_size + bytes_read >= output_capacity)
+        {
+            output_capacity *= 2;
+            char *new_output = dl_calloc(output_capacity, sizeof(char));
+            if (!new_output)
+            {
+                free(output);
+                close(pipe_fds[0]);
+                waitpid(pid, NULL, 0);
+                return (dl_strdup(""));
+            }
+            dl_memcpy(new_output, output, total_size);
+            free(output);
+            output = new_output;
+        }
+        
+        dl_memcpy(output + total_size, buffer, bytes_read);
+        total_size += bytes_read;
+    }
+    output[total_size] = '\0';
+    
+    close(pipe_fds[0]);
+    waitpid(pid, NULL, 0);
+    
+    // Remove trailing newline(s)
+    while (total_size > 0 && (output[total_size - 1] == '\n' || output[total_size - 1] == '\r'))
+    {
+        output[total_size - 1] = '\0';
+        total_size--;
+    }
+    
+    return (output);
+}
+
+// Expand command substitution $(command) in a string
+char *expand_command_substitution(char *str)
+{
+    char *result;
+    char *cmd_start;
+    char *cmd_end;
+    char *command;
+    char *cmd_output;
+    int i;
+    int paren_depth;
+    
+    if (!str)
+        return (NULL);
+    
+    // Check if string contains command substitution
+    if (strstr(str, "$(") == NULL)
+        return (dl_strdup(str));
+    
+    result = dl_calloc(1, 1);  // Start with empty string
+    if (!result)
+        return (NULL);
+    
+    i = 0;
+    while (str[i])
+    {
+        if (str[i] == '$' && str[i + 1] == '(')
+        {
+            // Find matching closing parenthesis (handle nesting)
+            cmd_start = str + i + 2;
+            paren_depth = 1;
+            cmd_end = cmd_start;
+            
+            while (*cmd_end && paren_depth > 0)
+            {
+                if (*cmd_end == '(')
+                    paren_depth++;
+                else if (*cmd_end == ')')
+                    paren_depth--;
+                if (paren_depth > 0)
+                    cmd_end++;
+            }
+            
+            if (paren_depth != 0)
+            {
+                // Unmatched parenthesis, treat as literal
+                char temp[3] = {'$', '(', '\0'};
+                char *new_result = dl_strjoin(result, temp);
+                free(result);
+                result = new_result;
+                i += 2;
+                continue;
+            }
+            
+            // Extract and execute command
+            int cmd_len = cmd_end - cmd_start;
+            command = dl_calloc(cmd_len + 1, sizeof(char));
+            if (!command)
+            {
+                free(result);
+                return (NULL);
+            }
+            dl_strncpy(command, cmd_start, cmd_len);
+            command[cmd_len] = '\0';
+            
+            // Execute command and get output
+            cmd_output = execute_subshell(command);
+            free(command);
+            
+            if (cmd_output)
+            {
+                char *new_result = dl_strjoin(result, cmd_output);
+                free(result);
+                free(cmd_output);
+                result = new_result;
+            }
+            
+            // Skip past the closing parenthesis
+            i = (cmd_end - str) + 1;
+        }
+        else
+        {
+            // Copy literal character
+            char temp[2] = {str[i], '\0'};
+            char *new_result = dl_strjoin(result, temp);
+            free(result);
+            result = new_result;
+            i++;
+        }
+    }
+    
+    return (result);
+}
+
 int expand_environment_variables(void)
 {
-    // Expand environment variables in command arguments
-    // This will be called during command parsing to expand $VAR in arguments
+    // Expand command substitution and environment variables in command arguments
+    if (!g_data.args_array)
+        return (0);
     
-    // For now, return success - the actual expansion will be done
-    // when processing individual arguments in the parsing phase
-    return (0);
+    return (expand_environment_array(g_data.args_array));
 }
 
 // Expand environment variables in an array of strings
@@ -20,11 +201,23 @@ int expand_environment_array(char **array)
     {
         if (array[i] && dl_strchr(array[i], '$') != NULL)
         {
-            char *expanded = expand_environment_string(array[i]);
-            if (expanded)
+            // First expand command substitution $(...)
+            char *cmd_expanded = expand_command_substitution(array[i]);
+            if (cmd_expanded)
             {
                 free(array[i]);
-                array[i] = expanded;
+                array[i] = cmd_expanded;
+            }
+            
+            // Then expand environment variables $VAR
+            if (dl_strchr(array[i], '$') != NULL)
+            {
+                char *env_expanded = expand_environment_string(array[i]);
+                if (env_expanded)
+                {
+                    free(array[i]);
+                    array[i] = env_expanded;
+                }
             }
         }
     }
