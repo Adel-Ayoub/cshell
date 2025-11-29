@@ -228,6 +228,8 @@ void cleanup_all(void)
         free_string_array(g_data.args_array);
     if (g_data.args_list)
         free_args_list(g_data.args_list);
+    if (g_data.quoted_args)
+        free(g_data.quoted_args);
     
     // Free redirections
     if (g_data.redirections)

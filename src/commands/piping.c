@@ -1,6 +1,6 @@
 #include "cshell.h"
 
-// Parse a single command string into arguments array
+// Parse a single command string into arguments array (quote-aware)
 char **parse_single_command(char *cmd_str)
 {
     char **args;
@@ -8,52 +8,82 @@ char **parse_single_command(char *cmd_str)
     int i;
     int start;
     int len;
+    int in_quotes;
+    char quote_char;
     
     if (!cmd_str)
         return (NULL);
     
-    // Count arguments (simple space-based splitting for now)
-    count = 1;
-    for (i = 0; cmd_str[i]; i++)
+    // Count arguments (quote-aware space splitting)
+    count = 0;
+    in_quotes = 0;
+    quote_char = 0;
+    i = 0;
+    while (cmd_str[i])
     {
-        if (cmd_str[i] == ' ' && cmd_str[i + 1] && cmd_str[i + 1] != ' ')
-            count++;
+        // Skip leading spaces
+        while (cmd_str[i] == ' ' || cmd_str[i] == '\t')
+            i++;
+        if (!cmd_str[i])
+            break;
+        
+        count++;
+        // Skip this argument
+        while (cmd_str[i] && (in_quotes || (cmd_str[i] != ' ' && cmd_str[i] != '\t')))
+        {
+            if (!in_quotes && (cmd_str[i] == '"' || cmd_str[i] == '\''))
+            {
+                in_quotes = 1;
+                quote_char = cmd_str[i];
+            }
+            else if (in_quotes && cmd_str[i] == quote_char)
+            {
+                in_quotes = 0;
+                quote_char = 0;
+            }
+            i++;
+        }
     }
+    
+    if (count == 0)
+        return (NULL);
     
     // Allocate args array
     args = (char **)dl_calloc(count + 1, sizeof(char *));
     if (!args)
         return (NULL);
     
-    // Split by spaces
-    start = 0;
+    // Split by spaces (quote-aware) and strip quotes
     count = 0;
+    in_quotes = 0;
+    quote_char = 0;
     i = 0;
     while (cmd_str[i])
     {
-        if (cmd_str[i] == ' ')
+        // Skip leading spaces
+        while (cmd_str[i] == ' ' || cmd_str[i] == '\t')
+            i++;
+        if (!cmd_str[i])
+            break;
+        
+        start = i;
+        // Find end of this argument
+        while (cmd_str[i] && (in_quotes || (cmd_str[i] != ' ' && cmd_str[i] != '\t')))
         {
-            if (i > start)
+            if (!in_quotes && (cmd_str[i] == '"' || cmd_str[i] == '\''))
             {
-                len = i - start;
-                args[count] = (char *)dl_calloc(len + 1, sizeof(char));
-                if (!args[count])
-                {
-                    free_string_array(args);
-                    return (NULL);
-                }
-                dl_strncpy(args[count], cmd_str + start, len);
-                args[count][len] = '\0';
-                count++;
+                in_quotes = 1;
+                quote_char = cmd_str[i];
             }
-            start = i + 1;
+            else if (in_quotes && cmd_str[i] == quote_char)
+            {
+                in_quotes = 0;
+                quote_char = 0;
+            }
+            i++;
         }
-        i++;
-    }
-    
-    // Add the last argument
-    if (i > start)
-    {
+        
+        // Extract and strip quotes from the argument
         len = i - start;
         args[count] = (char *)dl_calloc(len + 1, sizeof(char));
         if (!args[count])
@@ -61,8 +91,29 @@ char **parse_single_command(char *cmd_str)
             free_string_array(args);
             return (NULL);
         }
-        dl_strncpy(args[count], cmd_str + start, len);
-        args[count][len] = '\0';
+        
+        // Copy while stripping quotes
+        int j = 0;
+        in_quotes = 0;
+        quote_char = 0;
+        for (int k = start; k < i; k++)
+        {
+            if (!in_quotes && (cmd_str[k] == '"' || cmd_str[k] == '\''))
+            {
+                in_quotes = 1;
+                quote_char = cmd_str[k];
+            }
+            else if (in_quotes && cmd_str[k] == quote_char)
+            {
+                in_quotes = 0;
+                quote_char = 0;
+            }
+            else
+            {
+                args[count][j++] = cmd_str[k];
+            }
+        }
+        args[count][j] = '\0';
         count++;
     }
     
@@ -264,7 +315,7 @@ int handle_pipe_direct(char *cmd_str)
     return (status);
 }
 
-// Parse commands separated by pipes
+// Parse commands separated by pipes (quote-aware)
 char **parse_pipe_commands(char *cmd_str)
 {
     char **commands;
@@ -272,16 +323,32 @@ char **parse_pipe_commands(char *cmd_str)
     int count;
     int start;
     int len;
+    int in_quotes;
+    char quote_char;
     
     if (!cmd_str)
         return (NULL);
     
-    // Count pipe separators
+    // Count pipe separators (skip pipes inside quotes)
     count = 1;
+    in_quotes = 0;
+    quote_char = 0;
     for (i = 0; cmd_str[i]; i++)
     {
-        if (cmd_str[i] == '|')
+        if (!in_quotes && (cmd_str[i] == '"' || cmd_str[i] == '\''))
+        {
+            in_quotes = 1;
+            quote_char = cmd_str[i];
+        }
+        else if (in_quotes && cmd_str[i] == quote_char)
+        {
+            in_quotes = 0;
+            quote_char = 0;
+        }
+        else if (!in_quotes && cmd_str[i] == '|')
+        {
             count++;
+        }
     }
     
     // Allocate commands array
@@ -289,12 +356,24 @@ char **parse_pipe_commands(char *cmd_str)
     if (!commands)
         return (NULL);
     
-    // Split by pipes
+    // Split by pipes (skip pipes inside quotes)
     start = 0;
     count = 0;
+    in_quotes = 0;
+    quote_char = 0;
     for (i = 0; cmd_str[i]; i++)
     {
-        if (cmd_str[i] == '|')
+        if (!in_quotes && (cmd_str[i] == '"' || cmd_str[i] == '\''))
+        {
+            in_quotes = 1;
+            quote_char = cmd_str[i];
+        }
+        else if (in_quotes && cmd_str[i] == quote_char)
+        {
+            in_quotes = 0;
+            quote_char = 0;
+        }
+        else if (!in_quotes && cmd_str[i] == '|')
         {
             len = i - start;
             commands[count] = (char *)dl_calloc(len + 1, sizeof(char));

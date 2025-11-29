@@ -58,10 +58,20 @@ int tokenize_input(char *input)
     if (!tokens)
         return (-1);
     
+    // Allocate quoted_args tracking array
+    g_data.quoted_args = (int *)dl_calloc(count + 1, sizeof(int));
+    if (!g_data.quoted_args)
+    {
+        free_string_array(tokens);
+        return (-1);
+    }
+    
     // Fill token array with proper quote handling
     if (fill_tokens_with_quotes(input, tokens) != 0)
     {
         free_string_array(tokens);
+        free(g_data.quoted_args);
+        g_data.quoted_args = NULL;
         return (-1);
     }
     
@@ -70,6 +80,8 @@ int tokenize_input(char *input)
     if (!g_data.args_list)
     {
         free_string_array(tokens);
+        free(g_data.quoted_args);
+        g_data.quoted_args = NULL;
         return (-1);
     }
     
@@ -79,6 +91,8 @@ int tokenize_input(char *input)
     {
         free_args_list(g_data.args_list);
         free_string_array(tokens);
+        free(g_data.quoted_args);
+        g_data.quoted_args = NULL;
         return (-1);
     }
     
@@ -146,6 +160,7 @@ int fill_tokens_with_quotes(char *input, char **tokens)
     int in_quotes;
     char quote_char;
     int token_start;
+    int was_quoted;
     
     if (!input || !tokens)
         return (-1);
@@ -166,14 +181,16 @@ int fill_tokens_with_quotes(char *input, char **tokens)
         
         // Start of token
         token_start = i;
+        was_quoted = 0;
         
-        // Process token
+        // Process token - first pass to find end and check if quoted
         while (input[i] && (in_quotes || (input[i] != ' ' && input[i] != '\t' && input[i] != '\n')))
         {
             if (!in_quotes && (input[i] == '"' || input[i] == '\''))
             {
                 in_quotes = 1;
                 quote_char = input[i];
+                was_quoted = 1;  // Mark that this token contains quotes
                 i++;
             }
             else if (in_quotes && input[i] == quote_char)
@@ -188,17 +205,39 @@ int fill_tokens_with_quotes(char *input, char **tokens)
             }
         }
         
-        // Extract token (without quotes)
+        // Extract token - strip quotes from the content
         tokens[j] = dl_calloc(i - token_start + 1, sizeof(char));
         if (!tokens[j])
             return (-1);
         
         k = 0;
+        in_quotes = 0;
+        quote_char = 0;
         for (int m = token_start; m < i; m++)
         {
-            tokens[j][k++] = input[m];
+            // Skip quote characters but include their content
+            if (!in_quotes && (input[m] == '"' || input[m] == '\''))
+            {
+                in_quotes = 1;
+                quote_char = input[m];
+                // Don't add the opening quote to the token
+            }
+            else if (in_quotes && input[m] == quote_char)
+            {
+                in_quotes = 0;
+                quote_char = 0;
+                // Don't add the closing quote to the token
+            }
+            else
+            {
+                tokens[j][k++] = input[m];
+            }
         }
         tokens[j][k] = '\0';
+        
+        // Track if this argument was quoted (to skip wildcard expansion)
+        if (g_data.quoted_args)
+            g_data.quoted_args[j] = was_quoted;
         
         j++;
     }

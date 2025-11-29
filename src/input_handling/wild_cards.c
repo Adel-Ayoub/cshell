@@ -29,7 +29,10 @@ int expand_wildcards(void)
     // First pass: count how many arguments we'll have after expansion
     while (g_data.args_array[i])
     {
-        if (g_data.args_array[i] && wild_card_check(g_data.args_array[i]))
+        // Skip wildcard expansion for quoted arguments
+        int is_quoted = (g_data.quoted_args && g_data.quoted_args[i]);
+        
+        if (!is_quoted && g_data.args_array[i] && wild_card_check(g_data.args_array[i]))
         {
             // Don't expand the first argument (command name)
             if (i == 0)
@@ -71,18 +74,30 @@ int expand_wildcards(void)
     if (!new_args)
         return (-1);
     
+    // Allocate new quoted_args tracking array
+    int *new_quoted = dl_calloc(expanded_count + 1, sizeof(int));
+    if (!new_quoted)
+    {
+        free(new_args);
+        return (-1);
+    }
+    
     // Second pass: fill the new array with expanded arguments
     i = 0;
     int new_index = 0;
     
     while (g_data.args_array[i])
     {
-        if (g_data.args_array[i] && wild_card_check(g_data.args_array[i]))
+        // Skip wildcard expansion for quoted arguments
+        int is_quoted = (g_data.quoted_args && g_data.quoted_args[i]);
+        
+        if (!is_quoted && g_data.args_array[i] && wild_card_check(g_data.args_array[i]))
         {
             // Don't expand the first argument (command name)
             if (i == 0)
             {
                 new_args[new_index] = dl_strdup(g_data.args_array[i]);
+                new_quoted[new_index] = 0;
                 new_index++;
             }
             else
@@ -94,6 +109,7 @@ int expand_wildcards(void)
                     while (expanded[j])
                     {
                         new_args[new_index] = dl_strdup(expanded[j]);
+                        new_quoted[new_index] = 0;  // Expanded args are not quoted
                         new_index++;
                         j++;
                     }
@@ -103,22 +119,28 @@ int expand_wildcards(void)
                 {
                     // No matches found, keep original pattern
                     new_args[new_index] = dl_strdup(g_data.args_array[i]);
+                    new_quoted[new_index] = 0;
                     new_index++;
                 }
             }
         }
         else
         {
-            // No wildcards, copy as-is
+            // No wildcards or quoted, copy as-is
             new_args[new_index] = dl_strdup(g_data.args_array[i]);
+            new_quoted[new_index] = is_quoted;
             new_index++;
         }
         i++;
     }
     
-    // Free old array and replace with new one
+    // Free old arrays and replace with new ones
     free_string_array(g_data.args_array);
+    if (g_data.quoted_args)
+        free(g_data.quoted_args);
+    
     g_data.args_array = new_args;
+    g_data.quoted_args = new_quoted;
     g_data.args_count = expanded_count;
     
     return (0);

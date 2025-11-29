@@ -149,6 +149,7 @@ typedef struct s_data {
     char *input_line;
     t_args *args_list;
     char **args_array;
+    int *quoted_args;    // Track which args were quoted (skip wildcard expansion)
     int args_count;
     
     // Redirections
