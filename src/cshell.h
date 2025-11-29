@@ -16,6 +16,7 @@
 #include <readline/history.h>
 #include <sys/ioctl.h>
 #include <errno.h>
+#include <pwd.h>
 
 #include "../libdl/libdl.h"
 
@@ -332,6 +333,7 @@ char *find_command_path(char *command);
 // Builtin helpers
 int is_builtin(char *command);
 int is_built_in(char *command);
+char *expand_tilde(const char *path);
 
 // Additional builtin helpers
 void display_exported_variables(void);
