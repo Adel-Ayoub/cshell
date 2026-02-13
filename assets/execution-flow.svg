@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 579.2 1615.4499999999998" width="579.2" height="1615.4499999999998" style="--bg:#FFFFFF;--fg:#27272A;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 30%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="4.8" refX="8" refY="2.4" orient="auto">
+    <polygon points="0 0, 8 2.4, 0 4.8" fill="var(--_arrow)" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="4.8" refX="0" refY="2.4" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.4, 8 4.8" fill="var(--_arrow)" />
+  </marker>
+</defs>
+<polyline points="287.175,1271.4499999999998 287.175,1311.4499999999998" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
+<polyline points="287.175,1347.4499999999998 287.175,1387.4499999999998" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
+<polyline points="287.175,1423.4499999999998 287.175,1463.4499999999998" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
+<polyline points="287.175,1499.4499999999998 287.175,1557.4499999999998 348.56250000000006,1557.4499999999998" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
+<polyline points="421.76250000000005,1539.4499999999998 421.76250000000005,1519.4499999999998 552.775,1519.4499999999998 552.775,203.09149779735685 482.7585022026432,203.09149779735685" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
+<polyline points="445.0078908675053,240.84210913249473 445.0078908675053,281.8 450.425,281.8 450.425,310.3" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
+<polyline points="366.92244121100003,187.67244121100003 366.92244121100003,281.8 216.3375,281.8 216.3375,497.3 187.16250000000002,497.3" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
+<polyline points="450.425,346.3 450.425,403.3" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
+<polyline points="450.425,439.3 450.425,497.3 347.86250000000007,497.3" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
+<polyline points="267.51250000000005,515.3 267.51250000000005,555.3" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
+<polyline points="227.9651338803437,643.2526338803436 227.9651338803437,711.3 116.775,711.3 116.775,739.8" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
+<polyline points="298.1211221470837,652.1913778529163 298.1211221470837,711.3 352.71250000000003,711.3 352.71250000000003,815.8" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
+<polyline points="116.775,775.8 116.775,865.125" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
+<polyline points="116.775,901.125 116.775,1007.4499999999998" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
+<polyline points="116.775,1043.4499999999998 116.775,1101.4499999999998 217.55,1101.4499999999998" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
+<polyline points="325.3684009218375,923.1059009218375 325.3684009218375,978.9499999999999 287.175,978.9499999999999 287.175,1007.4499999999998" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
+<polyline points="387.30787542012814,915.8546245798719 387.30787542012814,978.9499999999999 454,978.9499999999999 454,1007.4499999999998" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
+<polyline points="287.175,1043.4499999999998 287.175,1083.4499999999998" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
+<polyline points="454,1043.4499999999998 454,1101.4499999999998 356.8,1101.4499999999998" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
+<polyline points="287.175,1119.4499999999998 287.175,1159.4499999999998" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
+<polyline points="287.175,1195.4499999999998 287.175,1235.4499999999998" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#arrowhead)" />
+<rect x="433.845" y="268.3" width="33.16" height="27" rx="4" ry="4" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="0.5" />
+<text x="450.425" y="281.8" text-anchor="middle" dy="0.35em" font-size="11" font-weight="400" fill="var(--_text-muted)">Yes</text>
+<rect x="202.6175" y="361.3" width="27.44" height="27" rx="4" ry="4" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="0.5" />
+<text x="216.3375" y="374.8" text-anchor="middle" dy="0.35em" font-size="11" font-weight="400" fill="var(--_text-muted)">No</text>
+<rect x="100.19500000000001" y="697.8" width="33.16" height="27" rx="4" ry="4" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="0.5" />
+<text x="116.775" y="711.3" text-anchor="middle" dy="0.35em" font-size="11" font-weight="400" fill="var(--_text-muted)">Yes</text>
+<rect x="338.9925" y="744.3" width="27.44" height="27" rx="4" ry="4" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="0.5" />
+<text x="352.71250000000003" y="757.8" text-anchor="middle" dy="0.35em" font-size="11" font-weight="400" fill="var(--_text-muted)">No</text>
+<rect x="270.595" y="965.4499999999999" width="33.16" height="27" rx="4" ry="4" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="0.5" />
+<text x="287.175" y="978.9499999999999" text-anchor="middle" dy="0.35em" font-size="11" font-weight="400" fill="var(--_text-muted)">Yes</text>
+<rect x="440.28" y="965.4499999999999" width="27.44" height="27" rx="4" ry="4" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="0.5" />
+<text x="454" y="978.9499999999999" text-anchor="middle" dy="0.35em" font-size="11" font-weight="400" fill="var(--_text-muted)">No</text>
+<rect x="235.425" y="1235.4499999999998" width="103.5" height="36" rx="18" ry="18" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+<rect x="235.425" y="1311.4499999999998" width="103.5" height="36" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+<rect x="231.85000000000002" y="1387.4499999999998" width="110.65" height="36" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+<rect x="171.075" y="1463.4499999999998" width="232.20000000000002" height="36" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+<rect x="348.56250000000006" y="1539.4499999999998" width="146.4" height="36" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+<polygon points="432.54999999999995,40 539.1999999999999,146.65 432.54999999999995,253.3 325.9,146.65" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+<rect x="370.075" y="310.3" width="160.70000000000002" height="36" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+<rect x="187.16250000000002" y="479.3" width="160.70000000000002" height="36" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+<rect x="370.075" y="403.3" width="160.70000000000002" height="36" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+<polygon points="267.51250000000005,555.3 331.26250000000005,619.05 267.51250000000005,682.8 203.76250000000005,619.05" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+<rect x="61.45" y="739.8" width="110.65" height="36" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+<polygon points="352.71250000000003,815.8 420.0375,883.125 352.71250000000003,950.45 285.38750000000005,883.125" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+<rect x="50.724999999999994" y="865.125" width="132.10000000000002" height="36" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+<rect x="40" y="1007.4499999999998" width="153.55" height="36" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+<rect x="217.55" y="1083.4499999999998" width="139.25" height="36" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+<rect x="217.55" y="1007.4499999999998" width="139.25" height="36" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+<rect x="380.8" y="1007.4499999999998" width="146.4" height="36" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+<rect x="199.675" y="1159.4499999999998" width="175" height="36" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+<text x="287.175" y="1253.4499999999998" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="var(--_text)">User Input</text>
+<text x="287.175" y="1329.4499999999998" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="var(--_text)">read_input</text>
+<text x="287.175" y="1405.4499999999998" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="var(--_text)">parse_input</text>
+<text x="287.175" y="1481.4499999999998" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="var(--_text)">expand_environment_variables</text>
+<text x="421.76250000000005" y="1557.4499999999998" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="var(--_text)">expand_wildcards</text>
+<text x="432.54999999999995" y="146.65" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="var(--_text)">Has Logical Operators?</text>
+<text x="450.425" y="328.3" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="var(--_text)">Build Trinary Tree</text>
+<text x="267.51250000000005" y="497.3" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="var(--_text)">parse_redirections</text>
+<text x="450.425" y="421.3" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="var(--_text)">Traverse &amp; Execute</text>
+<text x="267.51250000000005" y="619.05" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="var(--_text)">Has Pipes?</text>
+<text x="116.775" y="757.8" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="var(--_text)">handle_pipe</text>
+<text x="352.71250000000003" y="883.125" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="var(--_text)">Is Builtin?</text>
+<text x="116.775" y="883.125" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="var(--_text)">Fork Processes</text>
+<text x="116.775" y="1025.4499999999998" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="var(--_text)">Wait for Children</text>
+<text x="287.175" y="1101.4499999999998" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="var(--_text)">Set Exit Status</text>
+<text x="287.175" y="1025.4499999999998" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="var(--_text)">execute_builtin</text>
+<text x="454" y="1025.4499999999998" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="var(--_text)">execute_external</text>
+<text x="287.175" y="1177.4499999999998" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="var(--_text)">cleanup_redirections</text>
+</svg>

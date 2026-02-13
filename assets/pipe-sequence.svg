@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 797.4 820" width="797.4" height="820" style="--bg:#FFFFFF;--fg:#27272A;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 30%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="seq-arrow" markerWidth="8" markerHeight="4.8" refX="8" refY="2.4" orient="auto-start-reverse">
+    <polygon points="0 0, 8 2.4, 0 4.8" fill="var(--_arrow)" />
+  </marker>
+  <marker id="seq-arrow-open" markerWidth="8" markerHeight="4.8" refX="8" refY="2.4" orient="auto-start-reverse">
+    <polyline points="0 0, 8 2.4, 0 4.8" fill="none" stroke="var(--_arrow)" stroke-width="1" />
+  </marker>
+</defs>
+<line x1="70" y1="70" x2="70" y2="790" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line x1="210" y1="70" x2="210" y2="790" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line x1="350" y1="70" x2="350" y2="790" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line x1="518.525" y1="70" x2="518.525" y2="790" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line x1="697.775" y1="70" x2="697.775" y2="790" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line x1="70" y1="90" x2="210" y2="90" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#seq-arrow)" />
+<text x="140" y="84" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-muted)">parse_pipe_commands()</text>
+<line x1="210" y1="130" x2="70" y2="130" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+<text x="140" y="124" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-muted)">command array</text>
+<line x1="70" y1="170" x2="350" y2="170" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#seq-arrow)" />
+<text x="210" y="164" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-muted)">init_pipes()</text>
+<line x1="350" y1="210" x2="70" y2="210" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+<text x="210" y="204" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-muted)">pipe fds created</text>
+<line x1="70" y1="250" x2="518.525" y2="250" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#seq-arrow)" />
+<text x="294.2625" y="244" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-muted)">fork()</text>
+<polyline points="518.525,290 548.525,290 548.525,310 518.525,310" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#seq-arrow)" />
+<text x="554.525" y="300" dy="0.35em" font-size="11" font-weight="400" fill="var(--_text-muted)">dup2(pipe_write, STDOUT)</text>
+<polyline points="518.525,360 548.525,360 548.525,380 518.525,380" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#seq-arrow)" />
+<text x="554.525" y="370" dy="0.35em" font-size="11" font-weight="400" fill="var(--_text-muted)">exec(cmd1)</text>
+<line x1="70" y1="430" x2="697.775" y2="430" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#seq-arrow)" />
+<text x="383.8875" y="424" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-muted)">fork()</text>
+<polyline points="697.775,470 727.775,470 727.775,490 697.775,490" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#seq-arrow)" />
+<text x="733.775" y="480" dy="0.35em" font-size="11" font-weight="400" fill="var(--_text-muted)">dup2(pipe_read, STDIN)</text>
+<polyline points="697.775,540 727.775,540 727.775,560 697.775,560" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#seq-arrow)" />
+<text x="733.775" y="550" dy="0.35em" font-size="11" font-weight="400" fill="var(--_text-muted)">exec(cmd2)</text>
+<line x1="70" y1="610" x2="350" y2="610" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#seq-arrow)" />
+<text x="210" y="604" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-muted)">close_pipeline()</text>
+<polyline points="70,650 100,650 100,670 70,670" fill="none" stroke="var(--_line)" stroke-width="0.75" marker-end="url(#seq-arrow)" />
+<text x="106" y="660" dy="0.35em" font-size="11" font-weight="400" fill="var(--_text-muted)">waitpid(children)</text>
+<polyline points="70,720 100,720 100,740 70,740" fill="none" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+<text x="106" y="730" dy="0.35em" font-size="11" font-weight="400" fill="var(--_text-muted)">set exit_status</text>
+<rect x="30" y="30" width="80" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+<text x="70" y="50" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="var(--_text)">Shell</text>
+<rect x="170" y="30" width="80" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+<text x="210" y="50" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="var(--_text)">Parser</text>
+<rect x="291.1" y="30" width="117.80000000000001" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+<text x="350" y="50" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="var(--_text)">Pipe Handler</text>
+<rect x="448.9" y="30" width="139.25" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+<text x="518.525" y="50" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="var(--_text)">Child Process 1</text>
+<rect x="628.15" y="30" width="139.25" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+<text x="697.775" y="50" text-anchor="middle" dy="0.35em" font-size="13" font-weight="500" fill="var(--_text)">Child Process 2</text>
+</svg>

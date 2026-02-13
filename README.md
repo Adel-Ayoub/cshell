@@ -18,6 +18,35 @@ make
 
 ---
 
+## Architecture
+
+### Shell Architecture Overview
+<p align="center">
+  <img src="assets/architecture.svg" alt="Shell Architecture" width="100%">
+</p>
+
+### Command Execution Flow
+<p align="center">
+  <img src="assets/execution-flow.svg" alt="Execution Flow" width="100%">
+</p>
+
+### Shell State Machine
+<p align="center">
+  <img src="assets/state-machine.svg" alt="State Machine" width="100%">
+</p>
+
+### Data Structures
+<p align="center">
+  <img src="assets/data-structures.svg" alt="Data Structures" width="100%">
+</p>
+
+### Pipe Handling Sequence
+<p align="center">
+  <img src="assets/pipe-sequence.svg" alt="Pipe Sequence" width="100%">
+</p>
+
+---
+
 ## Requirements
 
 - C compiler (GCC/Clang)
